@@ -1,0 +1,8 @@
+
+Germán Leiva demonstrates Namespaces in Pharo
+
+  https://www.youtube.com/watch?v=n4I7fSVNX2A
+
+Code in
+  http://www.squeaksource.com/Environments/
+
