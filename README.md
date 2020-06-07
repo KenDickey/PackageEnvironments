@@ -9,8 +9,8 @@ Early thoughts:
 
 Goal: Multiple Classes with same name coexist in different package environments.
 
-Current name lookup is local -> Smalltalk
-New name lookup is local -> PackageEnv -> Smalltalk
+- Current name lookup is local -> Smalltalk
+- New name lookup is local -> PackageEnv -> Smalltalk
 
 Selectors are polymorphic (method names don't care).
 
