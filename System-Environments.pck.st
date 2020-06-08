@@ -1,6 +1,9 @@
-'From Cuis 5.0 [latest update: #4208] on 8 June 2020 at 7:32:49 am'!
-'Description '!
-!provides: 'System-Environments' 1 0!
+'From Cuis 5.0 [latest update: #4209] on 8 June 2020 at 8:25:15 am'!
+'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
+
+This allows importing multiple Feature/Package Classes with the same name.
+'!
+!provides: 'System-Environments' 1 2!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -22,7 +25,21 @@ Environments are associated with packaged Features, whose Class NameSpace is dis
 This allows importing multiple Feature/Package Classes with the same name.
 
 I am an IdentityDictionary which holds the bindings of ClassNameSymbol->Class so my classes can be found and used.
+
+I am usually added to Smalltalk and also, as a sharedPool, to classes added by my named Feature.  
+
+The binding in Smalltalk allows access to my Classes via  <me> @ classNameSym.
+
+The sharedPools allow lookup without changing Class>>bindingOf:
+
+Think of me as an extension of Feature.
+
 !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/8/2020 08:19:50'!
+@ classNameSymbol
+
+	^ self at: classNameSymbol ! !
 
 !Environment class methodsFor: 'instance creation' stamp: 'KenD 6/8/2020 07:32:51'!
 fromFeature: aString
