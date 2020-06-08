@@ -35,4 +35,8 @@ Note that Packages can be versioned: I.e. A Class in version N can differ from a
 
 [What tools?  How2 make visible w/o clutter?]
 
+What is the simplest thing that will work?
+
+- ```Environment fromFeature: 'FeatureName'.```
+- Extend a current environment to include a cluster/cohort of Features.
 
