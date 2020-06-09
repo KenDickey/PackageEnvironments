@@ -1,16 +1,16 @@
-'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 3:24:51 pm'!
+'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 3:32:07 pm'!
 'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 5!
+!provides: 'System-Environments' 1 6!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
 
 !classDefinition: #Environment category: #'System-Environments'!
 IdentityDictionary subclass: #Environment
-	instanceVariableNames: 'name codePackage'
+	instanceVariableNames: 'name codePackage color'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-Environments'!
@@ -51,6 +51,11 @@ codePackage
 
 	^codePackage! !
 
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 15:30:31'!
+icon
+	"Answer a 16x16 color swatch"
+	^color icon! !
+
 !Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
 is: aSymbol
 	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
@@ -78,6 +83,11 @@ fromFeature: aString
 	 Answer a new Environment."
 	self notYetImplemented ! !
 
+!Environment methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 15:28:59'!
+initialize
+
+	color _ Color random! !
+
 !Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:56:06'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
@@ -89,7 +99,7 @@ fromCodePackage: aCodePackage
 	ifTrue: [ ^ self new fromCodePackage: aCodePackage ]
 ! !
 
-!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 09:10:21'!
+!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 15:31:56'!
 fromFeature: aString
 	"Similar to Feature>>require: but (sub)Class names are not
 	 registed in dictionary Smalltalk.
@@ -98,7 +108,7 @@ fromFeature: aString
 	existingCodePackage :=
 		 CodePackage packageOfSystemCategory: aString 
 						ifNone: [ ^self new fromFeature: aString].
-	^ self new fromCodePackage: existingCodePackage 
+	^ self fromCodePackage: existingCodePackage 
 	! !
 
 !Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:24:33'!
