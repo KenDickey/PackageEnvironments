@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 8:51:15 pm'!
+'From Cuis 5.0 [latest update: #4213] on 10 June 2020 at 7:07:38 am'!
 'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 8!
+!provides: 'System-Environments' 1 10!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -50,6 +50,11 @@ name
 at: aSymbol
 
 	^ self at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ]! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/10/2020 07:06:09'!
+at: aSymbol ifAbsent: absentBlock
+
+	^ super at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ifAbsent: absentBlock ]! !
 
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 09:38:09'!
 codePackage
@@ -177,6 +182,11 @@ classList
 	env _ self environment.
 	classList _ classList select: [:each | env includesKey: each withoutLeadingBlanks asSymbol].
 	^ classList! !
+
+!HierarchyBrowser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 06:52:10'!
+environment
+
+	^ centralClass ifNil: [super environment] ifNotNil: [centralClass environment]! !
 
 !Class methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 16:38:38'!
 environment
