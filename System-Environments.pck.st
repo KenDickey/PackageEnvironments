@@ -1,16 +1,16 @@
-'From Cuis 5.0 [latest update: #4213] on 10 June 2020 at 7:07:38 am'!
+'From Cuis 5.0 [latest update: #4213] on 10 June 2020 at 2:06:17 pm'!
 'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 10!
+!provides: 'System-Environments' 1 13!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
 
 !classDefinition: #Environment category: #'System-Environments'!
 IdentityDictionary subclass: #Environment
-	instanceVariableNames: 'name codePackage color'
+	instanceVariableNames: 'name codePackage'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-Environments'!
@@ -61,11 +61,6 @@ codePackage
 
 	^codePackage! !
 
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 15:30:31'!
-icon
-	"Answer a 16x16 color swatch"
-	^color icon! !
-
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:50:06'!
 includesKey: key 
 	"Answer whether the receiver has a key equal to the argument, key."
@@ -73,11 +68,12 @@ includesKey: key
 	self at: key ifAbsent: [^Smalltalk includesKey: key].
 	^true! !
 
-!Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
-is: aSymbol
-	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
+!Environment methodsFor: 'error handling' stamp: 'len 6/11/2020 08:10:53'!
+doesNotUnderstand: aMessage
+	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
+	! !
 
-!Environment methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:57:49'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/9/2020 12:57:49'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
@@ -93,17 +89,16 @@ fromCodePackage: aCodePackage
 	Smalltalk at:  name put: self
 ! !
 
-!Environment methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 09:03:14'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/9/2020 09:03:14'!
 fromFeature: aString
 	"Similar to Feature>>require: but (sub)Class names are not
 	 registed in dictionary Smalltalk.
 	 Answer a new Environment."
 	self notYetImplemented ! !
 
-!Environment methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 15:28:59'!
-initialize
-
-	color _ Color random! !
+!Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
+is: aSymbol
+	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
 
 !Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:56:06'!
 fromCodePackage: aCodePackage
@@ -128,44 +123,26 @@ fromFeature: aString
 	^ self fromCodePackage: existingCodePackage 
 	! !
 
-!Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 17:08:48'!
+!Browser methodsFor: '*system-environments' stamp: 'len 6/11/2020 08:43:56'!
 environment
-	| env |
-	selectedSystemCategory ifNil: [ ^Smalltalk ].
-	env _ Smalltalk at: ((selectedSystemCategory asIdentifier: true) asSymbol) ifAbsent: [ nil ].
-	^((env notNil) and: [ env is: #Environment ]) ifTrue: [ env ] ifFalse: [Smalltalk]! !
+	^ selectedSystemCategory ifNil: [Smalltalk] ifNotNil: [Smalltalk environmentFromSystemCategory: selectedSystemCategory]! !
 
-!Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 14:38:42'!
+!Browser methodsFor: '*system-environments' stamp: 'len 6/11/2020 09:26:22'!
 hierarchicalClassList
 
 	"classNames are an arbitrary collection of classNames of the system.
 	Reorder those class names so that they are sorted and indended by inheritance"
 
-	| classes |
+	| classes environment |
 
 	"Creating the hierarchy is *really slow* for the full class list. Skip it for now."
 	selectedSystemCategory = SystemOrganizer allCategory ifTrue: [^ self defaultClassList].
-	(self isBrowsingEnvironment)
-		ifTrue:  [ | env |
-			env := Smalltalk at: ((selectedSystemCategory asIdentifier: true) asSymbol) ifAbsent: [ nil ].
-			classes := env ifNotNil: [ env values ] ifNil: [ Array new ].
-		 ]
-		ifFalse: [ classes := self defaultClassList collect: [:sym | Smalltalk classNamed: sym]].
-	
+	environment _ self environment.
+	classes _ self defaultClassList collect: [:sym | environment at: sym].
 	^ self
 		flattenHierarchyTree: (self createHierarchyTreeOf: classes)
 		on: OrderedCollection new
-		indent: ''.! !
-
-!Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 14:55:07'!
-isBrowsingEnvironment
-	"Am I looking at Environment/NameSpace Classes or Smalltalk registered Classes?"
-
-	| possibleEnvironment |
-	selectedSystemCategory ifNil: [ ^false ].
-	possibleEnvironment _ Smalltalk at: ((selectedSystemCategory asIdentifier: true) asSymbol) 
-							ifAbsent: [ ^false ].
-	^ (possibleEnvironment is: #Environment)! !
+		indent: ''! !
 
 !Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:24:38'!
 selectedClass
@@ -220,7 +197,16 @@ listAtCategoryNamed: categoryName
 			^ self listAtCategoryNumber: i 
 		]! !
 
-!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:40:51'!
-icon
+!SystemDictionary methodsFor: '*system-environments' stamp: 'len 6/11/2020 08:42:43'!
+environmentFromSystemCategory: aString
+	| subcategory name i |
+	subcategory _ aString.
+	[name _ (subcategory asIdentifier: true) asSymbol.
+	self at: name ifPresent: [:anObject| (anObject is: #Environment) ifTrue: [^ anObject]].
+	(i _ subcategory findLast: [:one| one = $-]) = 0] whileFalse:
+	[subcategory _ subcategory copyFrom: 1 to: i-1].
+	^ self! !
 
-	^ Color transparent icon! !
+!SystemDictionary methodsFor: '*system-environments' stamp: 'len 6/11/2020 08:29:14'!
+name
+	^ #Smalltalk! !
