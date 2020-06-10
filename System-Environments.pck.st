@@ -1,16 +1,16 @@
-'From Cuis 5.0 [latest update: #4213] on 10 June 2020 at 2:58:19 pm'!
+'From Cuis 5.0 [latest update: #4213] on 10 June 2020 at 3:25:48 pm'!
 'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 11!
+!provides: 'System-Environments' 1 13!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
 
 !classDefinition: #Environment category: #'System-Environments'!
 IdentityDictionary subclass: #Environment
-	instanceVariableNames: 'name codePackage color'
+	instanceVariableNames: 'name codePackage packageName'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-Environments'!
@@ -56,16 +56,6 @@ at: aSymbol ifAbsent: absentBlock
 
 	^ super at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ifAbsent: absentBlock ]! !
 
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 09:38:09'!
-codePackage
-
-	^codePackage! !
-
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 15:30:31'!
-icon
-	"Answer a 16x16 color swatch"
-	^color icon! !
-
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:50:06'!
 includesKey: key 
 	"Answer whether the receiver has a key equal to the argument, key."
@@ -77,15 +67,15 @@ includesKey: key
 is: aSymbol
 	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
 
-!Environment methodsFor: 'instance creation' stamp: 'KenD 6/10/2020 15:05:42'!
+!Environment methodsFor: 'instance creation' stamp: 'KenD 6/10/2020 15:24:25'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
 	
-	name := aCodePackage packageName asEnvironmentName asSymbol.
-	codePackage := aCodePackage.
+	packageName := aCodePackage packageName.
+	name := packageName asEnvironmentName asSymbol.
 	"The basic difference is registration of Classes"
-	codePackage classesDo: [ :cls |
+	aCodePackage classesDo: [ :cls |
 		self at: cls name put: cls.
 		cls addSharedPool: self.
 		Smalltalk removeKey: cls name ifAbsent: [ nil ].
@@ -99,11 +89,6 @@ fromFeature: aString
 	 registed in dictionary Smalltalk.
 	 Answer a new Environment."
 	self notYetImplemented ! !
-
-!Environment methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 15:28:59'!
-initialize
-
-	color _ Color random! !
 
 !Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:56:06'!
 fromCodePackage: aCodePackage
@@ -226,7 +211,11 @@ asEnvironmentName
 
 	^ self asIdentifier: true! !
 
-!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:40:51'!
-icon
+!CodePackage methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 15:13:11'!
+environment
 
-	^ Color transparent icon! !
+	| possibleEnv |
+	possibleEnv _ Smalltalk at: (self packageName asEnvironmentName asSymbol)
+								ifAbsent: [ ^Smalltalk ].
+	^ (possibleEnv is: #Environment)
+		ifTrue: [ possibleEnv ] ifFalse: [ Smalltalk ] ! !
