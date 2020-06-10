@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 5:09:02 pm'!
+'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 8:51:15 pm'!
 'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 7!
+!provides: 'System-Environments' 1 8!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -46,6 +46,11 @@ name
 
 	^ self at: classNameSymbol ! !
 
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:36:53'!
+at: aSymbol
+
+	^ self at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ]! !
+
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 09:38:09'!
 codePackage
 
@@ -55,6 +60,13 @@ codePackage
 icon
 	"Answer a 16x16 color swatch"
 	^color icon! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:50:06'!
+includesKey: key 
+	"Answer whether the receiver has a key equal to the argument, key."
+	
+	self at: key ifAbsent: [^Smalltalk includesKey: key].
+	^true! !
 
 !Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
 is: aSymbol
