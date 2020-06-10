@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 3:32:07 pm'!
+'From Cuis 5.0 [latest update: #4213] on 9 June 2020 at 5:09:02 pm'!
 'Description Environments are associated with packaged Features, whose Class NameSpace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 6!
+!provides: 'System-Environments' 1 7!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -111,11 +111,12 @@ fromFeature: aString
 	^ self fromCodePackage: existingCodePackage 
 	! !
 
-!Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:24:33'!
+!Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 17:08:48'!
 environment
-
+	| env |
 	selectedSystemCategory ifNil: [ ^Smalltalk ].
-	^Smalltalk at: ((selectedSystemCategory asIdentifier: true) asSymbol) ifAbsent: [ Smalltalk ].! !
+	env _ Smalltalk at: ((selectedSystemCategory asIdentifier: true) asSymbol) ifAbsent: [ nil ].
+	^((env notNil) and: [ env is: #Environment ]) ifTrue: [ env ] ifFalse: [Smalltalk]! !
 
 !Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 14:38:42'!
 hierarchicalClassList
@@ -157,6 +158,19 @@ selectedClass
 	(name _ self selectedClassName) ifNil: [^ nil].
 	^ self environment at: name ifAbsent: nil! !
 
+!HierarchyBrowser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 16:14:21'!
+classList
+	"Nota Bene: replaces base system method"
+	| env |
+	env _ self environment.
+	classList _ classList select: [:each | env includesKey: each withoutLeadingBlanks asSymbol].
+	^ classList! !
+
+!Class methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 16:38:38'!
+environment
+	"Answer either Smalltalk or _the_ Environment instance in my sharedPool"
+	^self sharedPools detect: [ :p | p is: #Environment ] ifNone: [ Smalltalk ]! !
+
 !Categorizer methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 14:00:28'!
 classesAt: aCategoryName
 	"Nota Bene: I replace a base system method."
@@ -171,15 +185,20 @@ classesAt: aCategoryName
 	
 		! !
 
-!Categorizer methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 13:52:25'!
+!Categorizer methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 16:59:40'!
 listAtCategoryNamed: categoryName
 	"Answer the array of elements associated with the name, categoryName."
 	"Nota Bene: I replace a base system method"
 	| environment  |
 	environment  _ Smalltalk at: ((categoryName asIdentifier: true) asSymbol) ifAbsent: [nil].
-	environment 
-		ifNotNil: [ ^ environment keys ]
-		ifNil: [| i | 
+	(environment notNil and: [environment is: #Environment] )
+		ifTrue: [ ^ environment keys ]
+		ifFalse: [| i | 
 			i _ categoryArray indexOf: categoryName ifAbsent: [^Array new].
 			^ self listAtCategoryNumber: i 
 		]! !
+
+!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:40:51'!
+icon
+
+	^ Color transparent icon! !
