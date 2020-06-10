@@ -51,7 +51,7 @@ Currently, only able to convert a pre-loaded Feature into an Environment.
 Feature require: 'System-Environments'.
 Feature require: 'Morphic-Games-Solitaire'.
 Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
-(MorphicGamesSolitaire @ #FreeCell) newGameWitthScale: 0.8.
+(MorphicGamesSolitaire @ #FreeCell) newGameWithScale: 0.8.
 "Or World Menu -> New Morph.. -> Layouts -> FreeCell"
 HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #FreeCell) selector: nil.
 Smalltalk at: #Klondike put: (MorphicGamesSolitaire @ #Klondike).
