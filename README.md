@@ -2,7 +2,7 @@ Early experiment with lightweight Environment / Namespace usage in Packages.
 
 I.e. Package based environments.
 
-Probably broken & not yet ready to see the light of day..
+Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
 
 
 Early thoughts:
@@ -39,4 +39,30 @@ What is the simplest thing that will work?
 
 - ```Environment fromFeature: 'FeatureName'.```
 - Extend a current environment to include a cluster/cohort of Features.
+
+TRY IT OUT
+
+In your Cuis-Smalltalk directory:
+```git clone https://github.com/KenDickey/PackageEnvironments```
+
+Currently, only able to convert a pre-loaded Feature into an Environment.
+
+````smalltalk
+Feature require: 'System-Environments'.
+Feature require: 'Morphic-Games-Solitaire'.
+Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
+(MorphicGamesSolitaire @ #FreeCell) newGameWitthScale: 0.8.
+"Or World Menu -> New Morph.. -> Layouts -> FreeCell"
+HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #FreeCell) selector: nil.
+Smalltalk at: #Klondike put: (MorphicGamesSolitaire @ #Klondike).
+Klondike newGame.
+````
+
+One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.
+
+Easy mechanics.  Look at Environment>>fromCodePackage:
+
+Most work is tools.
+
+I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
