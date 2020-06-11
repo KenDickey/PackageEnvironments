@@ -23,12 +23,10 @@ Packages which #require: other packages = packages #use: other packages.
 => Packages have an "Environment" dictionary of Class-name -> Class.
 
 - Packages which #use: another package import that Package's Environment
-but for the names defined locally in the using package 
-  ["Copy-down with override" semantics]
 
-So, any lookup is just in one leaf dictionary, no nesting.
+Currently, I am using (deprecated) sharedPool, which could be renamed to sharedEnvironment.
 
-Tools maintain relations (e.g. delete Class in #used: => delete Class binding in using Packages).
+I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature require: 'MyFeature'.``` but the result is an environment.
 
 Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a version fork" operation as distinct from typical usage as now.
 
@@ -58,11 +56,15 @@ Smalltalk at: #Klondike put: (MorphicGamesSolitaire @ #Klondike).
 Klondike newGame.
 ````
 
-One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.
+One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.  ChangeSets work with added methods.
+
+```Environment fromFeature: 'MyFeature'``` adds #required Environments.
 
 Easy mechanics.  Look at Environment>>fromCodePackage:
 
-Most work is tools.
+Most work is teaching tools to look at Environments rather than just Smalltalk.  Note ```SystemDictionary>>environmentFromSystemCategory:```
+
+- Currently, need to update syntax hilighting (Shout) and get compiled classes to register with Environment not Smalltalk.
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
