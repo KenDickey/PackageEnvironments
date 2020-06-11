@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 10 June 2020 at 9:47:48 pm'!
+'From Cuis 5.0 [latest update: #4219] on 11 June 2020 at 12:18:06 am'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 23!
+!provides: 'System-Environments' 1 24!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -133,6 +133,144 @@ newNamed: aString
 	(Smalltalk includesKey: envName asSymbol) ifTrue: [^ self error: 'global ', envName, 'already exists'].
 	newEnv := self new name: envName asSymbol packageName: aString.
 	^ Smalltalk at: envName put: newEnv! !
+
+!CodeProvider methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 00:17:55'!
+annotationForSelector: aSelector ofClass: aClass 
+	"Provide a line of content for an annotation pane, representing  
+	information about the given selector and class"
+	"Nota Bene: replaces base system method"
+	| stamp sendersCount implementorsCount aCategory separator aString aList aComment stream requestList |
+	aSelector == #Comment
+		ifTrue: [^ self annotationForClassCommentFor: aClass].
+	aSelector == #Definition
+		ifTrue: [^ self annotationForClassDefinitionFor: aClass].
+	aSelector == #Hierarchy
+		ifTrue: [^ self annotationForHierarchyFor: aClass].
+	stream _ WriteStream on: String new.
+	requestList _ self annotationRequests.
+	separator _ self annotationSeparator.
+	requestList
+		do: [:aRequest | 
+			aRequest == #firstComment
+				ifTrue: [
+					aComment _ aClass firstCommentAt: aSelector.
+					aComment isEmptyOrNil
+						ifFalse: [stream position = 0 ifFalse: [stream nextPutAll: separator].
+								stream nextPutAll: aComment]].
+			aRequest == #masterComment
+				ifTrue: [
+					aComment _ aClass supermostPrecodeCommentFor: aSelector.
+					aComment isEmptyOrNil
+						ifFalse: [stream position = 0 ifFalse: [stream nextPutAll: separator].
+								stream nextPutAll: aComment]].
+			aRequest == #documentation
+				ifTrue: [
+					aComment _ aClass precodeCommentOrInheritedCommentFor: aSelector.
+					aComment isEmptyOrNil
+						ifFalse: [stream isEmpty ifFalse: [stream nextPutAll: separator].
+								stream nextPutAll: aComment]].
+			aRequest == #timeStamp
+				ifTrue: [
+					stamp _ self timeStamp.
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					stream nextPutAll: (stamp size > 0 ifTrue: [stamp] ifFalse: ['no timestamp'])].
+			aRequest == #messageCategory
+				ifTrue: [
+					aCategory _ aClass organization categoryOfElement: aSelector.
+					aCategory
+						ifNotNil: ["woud be nil for a method no longer present,  
+							e.g. in a recent-submissions browser"
+							stream isEmpty ifFalse: [stream nextPutAll: separator].
+							stream nextPutAll: aCategory]].
+			aRequest == #sendersCount
+				ifTrue: [
+					sendersCount _ Smalltalk numberOfSendersOf: aSelector.
+					sendersCount _ sendersCount = 1
+								ifTrue: ['1 sender']
+								ifFalse: [sendersCount printString , ' senders'].
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					stream nextPutAll: sendersCount].
+			aRequest == #implementorsCount
+				ifTrue: [
+					implementorsCount _ Smalltalk numberOfImplementorsOf: aSelector.
+					implementorsCount _ implementorsCount = 1
+								ifTrue: ['1 implementor']
+								ifFalse: [implementorsCount printString , ' implementors'].
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					stream nextPutAll: implementorsCount].
+			aRequest == #priorVersionsCount
+				ifTrue: [
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					self
+						addPriorVersionsCountForSelector: aSelector
+						ofClass: aClass
+						to: stream].
+			aRequest == #priorTimeStamp
+				ifTrue: [
+					stamp _ VersionsBrowser
+								timeStampFor: aSelector
+								class: aClass
+								reverseOrdinal: 2.
+					stamp
+						ifNotNil: [stream isEmpty ifFalse: [stream nextPutAll: separator].
+							stream nextPutAll: 'prior timestamp: ' , stamp]].
+			aRequest == #packages
+				ifTrue: [
+					(aClass compiledMethodAt: aSelector ifAbsent: nil) ifNotNil: [ :cm |
+						stream isEmpty ifFalse: [stream nextPutAll: separator].
+						((aClass isKindOf: Class) 
+							ifTrue: [aClass package] 
+							ifFalse: [CodePackage packageOfMethod: cm  methodReference 
+													ifNone: nil]
+						)
+							ifNil: [ stream nextPutAll: 'in no package' ]
+							ifNotNil: [ :codePackage |
+								stream nextPutAll: 'in package '; nextPutAll: codePackage packageName ]]].
+			aRequest == #changeSets
+				ifTrue: [
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					aList _ ChangeSet allChangeSetsWithClass: aClass selector: aSelector.
+					aList size > 0
+						ifTrue: [aList size = 1
+								ifTrue: [stream nextPutAll: 'only in change set']
+								ifFalse: [stream nextPutAll: 'in change sets:'].
+							aList
+								do: [:aChangeSet | stream nextPut: Character space; nextPutAll: aChangeSet name ]
+								separatedBy: [ stream nextPut: $, ]]
+						ifFalse: [stream nextPutAll: 'in no change set']].
+			aRequest == #allChangeSets
+				ifTrue: [
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					aList _ ChangeSet allChangeSetsWithClass: aClass selector: aSelector.
+					aList size > 0
+						ifTrue: [aList size = 1
+								ifTrue: [stream nextPutAll: 'only in change set']
+								ifFalse: [stream nextPutAll: 'in change sets:'].
+							aList
+								do: [:aChangeSet | stream nextPut: Character space; nextPutAll: aChangeSet name ]
+								separatedBy: [ stream nextPut: $, ]]
+						ifFalse: [stream nextPutAll: 'in no change set']].
+			aRequest == #allBaseSystemChangeSets
+				ifTrue: [
+					stream isEmpty ifFalse: [stream nextPutAll: separator].
+					aList _ (ChangeSet allChangeSetsWithClass: aClass selector: aSelector) select: [ :it | it isForBaseSystem ].
+					aList size > 0
+						ifTrue: [
+							aList size = 1
+								ifTrue: [stream nextPutAll: 'only in base system change set']
+								ifFalse: [stream nextPutAll: 'in base system change sets:'].
+							aList
+								do: [:aChangeSet | stream nextPut: Character space; nextPutAll: aChangeSet name ]
+								separatedBy: [ stream nextPut: $, ]]
+						ifFalse: [stream nextPutAll: 'in no base system change set']].
+			aRequest == #closuresInfo
+				ifTrue: [
+					aString _ aClass closuresInfoAt: aSelector.
+					aString size > 0
+						ifTrue: [stream isEmpty ifFalse: [stream nextPutAll: separator].
+								stream nextPutAll: aString]].
+		].
+	^ stream contents! !
 
 !Browser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 21:24:26'!
 environment
