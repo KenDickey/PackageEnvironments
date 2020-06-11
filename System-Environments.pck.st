@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 11 June 2020 at 12:18:06 am'!
+'From Cuis 5.0 [latest update: #4219] on 11 June 2020 at 2:11:48 am'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 24!
+!provides: 'System-Environments' 1 26!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -390,6 +390,15 @@ icon
 name
 	^ #Smalltalk! !
 
+!CodePackage methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 02:11:48'!
+classesDo: aBlock
+	"Nota Bene: this overwrites base system method"
+	| env |
+	env := self environment.
+	self systemCategories do: [ :cat |
+		(SystemOrganization listAtCategoryNamed: cat) do: [ :className |
+			aBlock value: (env at: className) ]]! !
+
 !CodePackage methodsFor: '*system-environments' stamp: 'len 6/12/2020 08:37:45'!
 environment
 	"Answer the Environment for the classes in this package, or Smalltalk if the package is not isolated."
@@ -403,3 +412,47 @@ isolate
 	(PopUpMenu confirm: 'Really move classes in ', self packageName, ' to a new Environment?')
 		ifFalse: [^ environment].
 	^ Environment new fromCodePackage: self! !
+
+!ChangeSet class methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 01:25:35'!
+methodAdded: aCompiledMethod selector: aSymbol inProtocol: aCategoryName class: aClass requestor: requestor
+
+	| packageOrNil |
+	
+	aClass wantsChangeSetLogging ifFalse: [ ^self ].
+	
+	packageOrNil _ ((aClass isKindOf: Class) 
+							ifTrue: [aClass package] 
+							ifFalse: [CodePackage packageOfMethod: aCompiledMethod  methodReference 
+													ifNone: nil]
+						).
+	(self changeSetForPackage: packageOrNil) ifNotNil: [ :changeSet |
+		changeSet
+			methodAdded: aCompiledMethod
+			selector: aSymbol
+			inProtocol: aCategoryName
+			class: aClass
+			requestor: requestor ].
+	packageOrNil ifNotNil: [
+		packageOrNil hasUnsavedChanges: true ]! !
+
+!ChangeSet class methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 01:26:30'!
+methodChangedFrom: oldMethod to: newMethod selector: aSymbol inClass: aClass requestor: requestor
+
+	| packageOrNil |
+	
+	aClass wantsChangeSetLogging ifFalse: [ ^self ].
+	
+	packageOrNil _ ((aClass isKindOf: Class) 
+							ifTrue: [aClass package] 
+							ifFalse: [CodePackage packageOfMethod: newMethod  methodReference 
+													ifNone: nil]
+						).
+	(self changeSetForPackage: packageOrNil) ifNotNil: [ :changeSet |
+		changeSet
+			methodChangedFrom: oldMethod
+			to: newMethod
+			selector: aSymbol
+			inClass: aClass
+			requestor: requestor ].
+	packageOrNil ifNotNil: [
+		packageOrNil hasUnsavedChanges: true ]! !
