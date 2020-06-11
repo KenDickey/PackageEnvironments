@@ -26,14 +26,18 @@ Currently, only able to convert a pre-loaded Feature into an Environment.
 "Close ALL Browsers"
 Feature require: 'System-Environments'.
 Feature require: 'Morphic-Games-Solitaire'.
+
 "CardMorph is a Class in Morphic-Games-Solitaire"
 CardMorph name.
+
 "Convert a CodePackage into an Environment"
 Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
-"Classes Klondike and FreeCell is exported from Environment"
+
+"Classes Klondike and FreeCell are exported from Environment"
 FreeCell newGameWithScale: 0.8. 
 "Or World Menu -> New Morph.. -> Layouts -> FreeCell"
-"Class #CardMorph is not visible in Smalltalk SystemDictionary
+
+"Class #CardMorph is no longer visible in Smalltalk SystemDictionary
  but can be accessed through its Enviromment, #MorphicGamesSolitaire"
 'Morphic-Games-Solitaire' asEnvironmentName.
 HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph)
