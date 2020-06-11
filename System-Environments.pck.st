@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 12 June 2020 at 3:35:05 pm'!
+'From Cuis 5.0 [latest update: #4219] on 10 June 2020 at 9:47:48 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 21!
+!provides: 'System-Environments' 1 23!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -49,24 +49,6 @@ printOn: aStream
 @ classNameSymbol
 
 	^ self at: classNameSymbol ! !
-
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:36:53'!
-at: aSymbol
-
-	^ self at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ]! !
-
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/10/2020 07:06:09'!
-at: aSymbol ifAbsent: absentBlock
-
-	^ super at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ifAbsent: absentBlock ]! !
-
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 15:35:05'!
-includesKey: key 
-	"Answer whether the receiver has a key equal to the argument, key.
-	 Nota Bene: ONLY in this Environment; No check in Smalltalk"
-	
-	super at: key ifAbsent: [^false].
-	^true! !
 
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 14:24:54'!
 package
@@ -152,9 +134,11 @@ newNamed: aString
 	newEnv := self new name: envName asSymbol packageName: aString.
 	^ Smalltalk at: envName put: newEnv! !
 
-!Browser methodsFor: '*system-environments' stamp: 'len 6/11/2020 08:43:56'!
+!Browser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 21:24:26'!
 environment
-	^ selectedSystemCategory ifNil: [Smalltalk] ifNotNil: [Smalltalk environmentFromSystemCategory: selectedSystemCategory]! !
+	^ selectedSystemCategory 
+		ifNil: [Smalltalk] 
+		ifNotNil: [Smalltalk environmentFromSystemCategory: selectedSystemCategory]! !
 
 !Browser methodsFor: '*system-environments' stamp: 'len 6/11/2020 09:26:22'!
 hierarchicalClassList
@@ -173,20 +157,42 @@ hierarchicalClassList
 		on: OrderedCollection new
 		indent: ''! !
 
-!Browser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:24:38'!
+!Browser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 21:47:39'!
 selectedClass
 	"Answer the class that is currently selected. Answer nil if no selection exists."
 	"Nota Bene: replaces method in base system"
-	| name |
+	| name env |
 	(name _ self selectedClassName) ifNil: [^ nil].
-	^ self environment at: name ifAbsent: nil! !
+	env := self environment.
+	(env == Smalltalk)
+	ifTrue: [
+	^ self environment at: name 
+			ifAbsent: [nil]
+	]
+	ifFalse: [
+		^self environment at: name 
+			ifAbsent: [
+				Smalltalk at: name
+							ifAbsent: [nil]
+			]
+	]! !
 
-!HierarchyBrowser methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 16:14:21'!
+!HierarchyBrowser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 21:34:00'!
 classList
 	"Nota Bene: replaces base system method"
 	| env |
 	env _ self environment.
-	classList _ classList select: [:each | env includesKey: each withoutLeadingBlanks asSymbol].
+	(env == Smalltalk)
+	ifTrue: [
+		classList _ classList select: [:each | 
+		env includesKey: each withoutLeadingBlanks asSymbol].
+	]
+	ifFalse: [
+		classList _ classList select: [:each | |lookupName|
+			lookupName := each withoutLeadingBlanks asSymbol.
+			(env includesKey: lookupName)
+			 or: [Smalltalk includesKey: lookupName]].
+	].
 	^ classList! !
 
 !HierarchyBrowser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 06:52:10'!
