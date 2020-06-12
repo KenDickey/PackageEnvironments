@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 12 June 2020 at 1:46:56 pm'!
+'From Cuis 5.0 [latest update: #4219] on 12 June 2020 at 2:47:29 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 19!
+!provides: 'System-Environments' 1 20!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -67,11 +67,12 @@ includesKey: key
 	self at: key ifAbsent: [^Smalltalk includesKey: key].
 	^true! !
 
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 13:38:44'!
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 14:24:54'!
 package
 
-	^ CodePackage installedPackages at: self packageName ifAbsent: [].
-	" CodePackage installedPackages detect: [:one| one environment == self] ifNone: [] "! !
+	^ (self packageName) 
+		ifNotNil: [ :pkgName | CodePackage installedPackages at: pkgName ifAbsent: []]
+		ifNil: [ CodePackage installedPackages detect: [:one| one environment == self] ifNone: [] ]! !
 
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 13:37:05'!
 packageName
@@ -83,18 +84,17 @@ doesNotUnderstand: aMessage
 	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
 	! !
 
-!Environment methodsFor: 'initialization' stamp: 'KenD 6/10/2020 17:12:44'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/12/2020 14:42:24'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
 	
-	category := aCodePackage packageName.
-	name := (category asIdentifier: true) asSymbol.
+	packageName := aCodePackage packageName.
+	name := packageName asEnvironmentName asSymbol.
 	"The basic difference is registration of Classes"
 	aCodePackage classesDo: [ :cls |
-		self at: cls name put: cls.
+		self declare: cls name from: Smalltalk.
 		cls addSharedPool: self.
-		Smalltalk removeKey: cls name ifAbsent: [ nil ].
 	].
 	Smalltalk at:  name put: self
 ! !
@@ -109,6 +109,11 @@ fromFeature: aString
 !Environment methodsFor: 'initialization' stamp: 'len 6/12/2020 08:40:10'!
 name: aString
 	name _ aString asSymbol! !
+
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/12/2020 14:32:04'!
+name: aSymbol packageName: aString
+	name _  aSymbol.
+	packageName _ aString! !
 
 !Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
 is: aSymbol
@@ -137,12 +142,14 @@ fromFeature: aString
 	^ self fromCodePackage: existingCodePackage 
 	! !
 
-!Environment class methodsFor: 'instance creation' stamp: 'len 6/12/2020 07:35:20'!
+!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/12/2020 14:31:01'!
 newNamed: aString
-	aString = aString asEnvironmentName ifFalse: [^ self error: 'invalid environment name'].
-	name _ aString asSymbol.
-	(Smalltalk includesKey: name) ifTrue: [^ self error: 'global ', name printString, 'already exists'].
-	^ Smalltalk at: name put: (self new name: name)! !
+	"Answer a new Environment with packageName aString and enter into Smalltalk"
+	| envName newEnv |
+	envName := aString asEnvironmentName ifFalse: [^ self error: 'invalid environment name'].
+	(Smalltalk includesKey: envName asSymbol) ifTrue: [^ self error: 'global ', envName, 'already exists'].
+	newEnv := self new name: envName asSymbol packageName: aString.
+	^ Smalltalk at: envName put: newEnv! !
 
 !Browser methodsFor: '*system-environments' stamp: 'len 6/11/2020 08:43:56'!
 environment
@@ -243,15 +250,11 @@ environment
 	"Answer the Environment for the classes in this package, or Smalltalk if the package is not isolated."
 	^ Smalltalk environmentFromSystemCategory: self systemCategoryPrefix! !
 
-!CodePackage methodsFor: '*system-environments' stamp: 'len 6/12/2020 09:11:31'!
+!CodePackage methodsFor: '*system-environments' stamp: 'KenD 6/12/2020 14:42:46'!
 isolate
 	"If the package classes are in the global Smalltalk environment, create a new environment corresponding to this package name and move all classes to the new environment, and answer the new enviroment. If the environment was already created, answer the existing environment."
 	| environment |
 	(environment _ self environment) == Smalltalk ifFalse: [^ environment].
 	(PopUpMenu confirm: 'Really move classes in ', self packageName, ' to a new Environment?')
 		ifFalse: [^ environment].
-	environment _ Environment newNamed: self systemCategoryPrefix asEnvironmentName.
-	self classesDo: [:each|
-		environment declare: each name from: Smalltalk.
-		each addSharedPool: environment].
-	^ environment! !
+	^ Environment new fromCodePackage: self! !
