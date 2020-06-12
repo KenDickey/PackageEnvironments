@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 12 June 2020 at 2:47:29 pm'!
+'From Cuis 5.0 [latest update: #4219] on 12 June 2020 at 3:35:05 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 20!
+!provides: 'System-Environments' 1 21!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -60,11 +60,12 @@ at: aSymbol ifAbsent: absentBlock
 
 	^ super at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ifAbsent: absentBlock ]! !
 
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:50:06'!
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 15:35:05'!
 includesKey: key 
-	"Answer whether the receiver has a key equal to the argument, key."
+	"Answer whether the receiver has a key equal to the argument, key.
+	 Nota Bene: ONLY in this Environment; No check in Smalltalk"
 	
-	self at: key ifAbsent: [^Smalltalk includesKey: key].
+	super at: key ifAbsent: [^false].
 	^true! !
 
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 14:24:54'!
@@ -84,7 +85,7 @@ doesNotUnderstand: aMessage
 	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
 	! !
 
-!Environment methodsFor: 'initialization' stamp: 'KenD 6/12/2020 14:42:24'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/12/2020 15:35:23'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
@@ -96,7 +97,7 @@ fromCodePackage: aCodePackage
 		self declare: cls name from: Smalltalk.
 		cls addSharedPool: self.
 	].
-	Smalltalk at:  name put: self
+	Smalltalk at: name put: self
 ! !
 
 !Environment methodsFor: 'initialization' stamp: 'KenD 6/9/2020 09:03:14'!
