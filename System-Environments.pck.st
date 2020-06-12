@@ -1,16 +1,16 @@
-'From Cuis 5.0 [latest update: #4213] on 12 June 2020 at 9:19:59 am'!
+'From Cuis 5.0 [latest update: #4219] on 12 June 2020 at 1:46:56 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 17!
+!provides: 'System-Environments' 1 19!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
 
 !classDefinition: #Environment category: #'System-Environments'!
 IdentityDictionary subclass: #Environment
-	instanceVariableNames: 'name'
+	instanceVariableNames: 'name packageName'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-Environments'!
@@ -50,14 +50,61 @@ printOn: aStream
 
 	^ self at: classNameSymbol ! !
 
-!Environment methodsFor: 'accessing' stamp: 'len 6/12/2020 09:06:27'!
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:36:53'!
+at: aSymbol
+
+	^ self at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ]! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/10/2020 07:06:09'!
+at: aSymbol ifAbsent: absentBlock
+
+	^ super at: aSymbol ifAbsent: [ Smalltalk at: aSymbol ifAbsent: absentBlock ]! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/9/2020 20:50:06'!
+includesKey: key 
+	"Answer whether the receiver has a key equal to the argument, key."
+	
+	self at: key ifAbsent: [^Smalltalk includesKey: key].
+	^true! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 13:38:44'!
 package
-	^ CodePackage installedPackages detect: [:one| one environment == self] ifNone: []! !
+
+	^ CodePackage installedPackages at: self packageName ifAbsent: [].
+	" CodePackage installedPackages detect: [:one| one environment == self] ifNone: [] "! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 13:37:05'!
+packageName
+
+	^packageName! !
 
 !Environment methodsFor: 'error handling' stamp: 'len 6/11/2020 08:10:53'!
 doesNotUnderstand: aMessage
 	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
 	! !
+
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/10/2020 17:12:44'!
+fromCodePackage: aCodePackage
+	"Convert from an already filed in Feature/Package.
+	 Answer a new Environment."
+	
+	category := aCodePackage packageName.
+	name := (category asIdentifier: true) asSymbol.
+	"The basic difference is registration of Classes"
+	aCodePackage classesDo: [ :cls |
+		self at: cls name put: cls.
+		cls addSharedPool: self.
+		Smalltalk removeKey: cls name ifAbsent: [ nil ].
+	].
+	Smalltalk at:  name put: self
+! !
+
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/9/2020 09:03:14'!
+fromFeature: aString
+	"Similar to Feature>>require: but (sub)Class names are not
+	 registed in dictionary Smalltalk.
+	 Answer a new Environment."
+	self notYetImplemented ! !
 
 !Environment methodsFor: 'initialization' stamp: 'len 6/12/2020 08:40:10'!
 name: aString
@@ -66,6 +113,29 @@ name: aString
 !Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
 is: aSymbol
 	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
+
+!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:56:06'!
+fromCodePackage: aCodePackage
+	"Convert from an already filed in Feature/Package.
+	 Answer a new Environment."
+	(PopUpMenu confirm: 'Really convert ', 
+							aCodePackage packageName, 
+							' to an Environment?')
+	ifFalse: [ ^ nil ]
+	ifTrue: [ ^ self new fromCodePackage: aCodePackage ]
+! !
+
+!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 15:31:56'!
+fromFeature: aString
+	"Similar to Feature>>require: but (sub)Class names are not
+	 registed in dictionary Smalltalk.
+	 Answer a new Environment."
+	| existingCodePackage | 
+	existingCodePackage :=
+		 CodePackage packageOfSystemCategory: aString 
+						ifNone: [ ^self new fromFeature: aString].
+	^ self fromCodePackage: existingCodePackage 
+	! !
 
 !Environment class methodsFor: 'instance creation' stamp: 'len 6/12/2020 07:35:20'!
 newNamed: aString
@@ -128,6 +198,19 @@ classesAt: aCategoryName
 	| environment |
 	environment _ Smalltalk environmentFromSystemCategory: aCategoryName.
 	^(self listAtCategoryNamed: aCategoryName) collect: [:aClassName | environment at: aClassName asSymbol ]! !
+
+!Categorizer methodsFor: '*system-environments' stamp: 'KenD 6/12/2020 13:42:26'!
+listAtCategoryNamed: categoryName
+	"Answer the array of elements associated with the name, categoryName."
+	"Nota Bene: I replace a base system method"
+	| environment  |
+	environment  _ Smalltalk at: ((categoryName asIdentifier: true) asSymbol) ifAbsent: [nil].
+	(environment notNil and: [environment is: #Environment] )
+		ifTrue: [ ^ environment keys ]
+		ifFalse: [| i | 
+			i _ categoryArray indexOf: categoryName ifAbsent: [^Array new].
+			^ self listAtCategoryNumber: i 
+		]! !
 
 !String methodsFor: '*system-environments' stamp: 'len 6/12/2020 07:17:16'!
 asEnvironmentName
