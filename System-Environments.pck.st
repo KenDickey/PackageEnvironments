@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 11 June 2020 at 2:11:48 am'!
+'From Cuis 5.0 [latest update: #4219] on 15 June 2020 at 2:46:10 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 26!
+!provides: 'System-Environments' 1 29!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -67,17 +67,32 @@ doesNotUnderstand: aMessage
 	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
 	! !
 
-!Environment methodsFor: 'initialization' stamp: 'KenD 6/12/2020 15:35:23'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/15/2020 14:47:11'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
 	
+	| pkgReqNames otherEnironments |
 	packageName := aCodePackage packageName.
 	name := packageName asEnvironmentName asSymbol.
-	"The basic difference is registration of Classes"
+	"The basic difference is registration of Classes; remove Classes from Smalltalk"
 	aCodePackage classesDo: [ :cls |
-		self declare: cls name from: Smalltalk.
-		cls addSharedPool: self.
+		self declare: cls name from: Smalltalk. "transfer association"
+		cls addSharedPool: self. "Add me to my Classes shared pool"
+	].
+	"Any requirement which is an Environment should be added to my Classes shared pools"
+	pkgReqNames := self requirementNamesFromCodePackage: aCodePackage.
+	otherEnironments := OrderedCollection new.
+	pkgReqNames do: [ :pkgName | | possibleEnvironment |
+		possibleEnvironment := Smalltalk at: pkgName asEnvironmentName asSymbol
+											ifAbsent: [nil].
+		(possibleEnvironment is: #Environment)
+			ifTrue: [ otherEnironments addLast: possibleEnvironment ]
+	].
+	(otherEnironments size > 0) ifTrue: [
+		self classesDo: [ :cls |
+			otherEnironments do: [ :env | cls addSharedPool: env]
+		]
 	].
 	Smalltalk at: name put: self
 ! !
@@ -101,6 +116,42 @@ name: aSymbol packageName: aString
 !Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
 is: aSymbol
 	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
+
+!Environment methodsFor: 'private' stamp: 'KenD 6/15/2020 09:11:45'!
+requirementNames
+	"Answer ordered requirement package names"
+
+	| reqNames |
+	reqNames := OrderedCollection new.  "We can have duplicate Class names. Keep order"
+	
+	self notYetImplemented.
+	^reqNames! !
+
+!Environment methodsFor: 'private' stamp: 'KenD 6/15/2020 13:56:55'!
+requirementNamesFromCodePackage: aCodePackage
+	"Answer ordered requirement package names.
+	 CodePackage => all requirements already satisfied."
+
+	| namesToReturn namesToProcess packageDict |
+	namesToReturn := OrderedCollection new.  "We can have duplicate Class names. Keep order"
+	namesToProcess := 
+			 (aCodePackage featureSpec requires collect: [ :r | r name ]) asOrderedCollection.
+	packageDict := CodePackage installedPackages.
+	[namesToProcess size > 0] whileTrue: [ |pkgName|
+		pkgName := namesToProcess removeFirst.
+		((namesToReturn includes: pkgName) or: [pkgName = #'Cuis-Base'])
+			ifFalse: [
+				namesToReturn addLast: pkgName.
+				namesToProcess addAllLast: 
+						((packageDict at: pkgName) featureSpec requires collect: [ :r | r name ])
+			]
+	].
+	^namesToReturn! !
+
+!Environment methodsFor: 'enumerating' stamp: 'KenD 6/15/2020 14:46:31'!
+classesDo: aBlock
+	"My Dictionary values are all my Classes"
+	self valuesDo: aBlock! !
 
 !Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:56:06'!
 fromCodePackage: aCodePackage
@@ -133,6 +184,12 @@ newNamed: aString
 	(Smalltalk includesKey: envName asSymbol) ifTrue: [^ self error: 'global ', envName, 'already exists'].
 	newEnv := self new name: envName asSymbol packageName: aString.
 	^ Smalltalk at: envName put: newEnv! !
+
+!ProtoObject methodsFor: '*system-environments' stamp: 'Install-Morph-MetaProperties 6/15/2020 14:21:30'!
+package
+
+	^nil
+	! !
 
 !CodeProvider methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 00:17:55'!
 annotationForSelector: aSelector ofClass: aClass 
@@ -380,6 +437,15 @@ environmentFromSystemCategory: aString
 	(i _ subcategory findLast: [:one| one = $-]) = 0] whileFalse:
 	[subcategory _ subcategory copyFrom: 1 to: i-1].
 	^ self! !
+
+!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/15/2020 13:13:07'!
+environmentOrNilFromCategory: aString
+	
+	self at: (aString asEnvironmentName asSymbol) 
+		ifPresent: [ :possibleEnvironment | 
+			(possibleEnvironment is: #Environment) ifTrue: [ ^possibleEnvironment ] 
+	].
+	^nil! !
 
 !SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:40:51'!
 icon
