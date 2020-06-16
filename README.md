@@ -16,19 +16,19 @@ Weak Goal: Cuis users won't notice until they need it.
 
 Selectors are polymorphic (method names don't care).
 
-Instanced know their Class.
+Instanced know their Class.  Classes know their CodePackage.
 
 Packages which #require: other packages = packages #use: other packages.
 
 => Packages have an "Environment" dictionary of Class-name -> Class.
 
-- Packages which #use: another package import that Package's Environment
+- Packages which #require: another package import that Package's Environment
 
 Currently, I am using (deprecated) sharedPool, which could be renamed to sharedEnvironment.
 
 I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature require: 'MyFeature'.``` but the result is an environment.
 
-Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a version fork" operation as distinct from typical usage as now.
+[Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a version fork" operation as distinct from typical usage as now.]
 
 
 [What tools?  How2 make visible w/o clutter?]
@@ -64,6 +64,16 @@ Easy mechanics.  Look at Environment>>fromCodePackage:
 
 Most work is teaching tools to look at Environments rather than just Smalltalk.  Note ```SystemDictionary>>environmentFromSystemCategory:```
 
+##The Story So Far
+==========
+- A Package can be used as a Feature or and Environment.
+- Can use ```Environment class>>fromFeature: 'FeatureName'``` to convert a 'FeatureName' (category) to an Environment.
+- When created, Environments check #required: Features, and #use their Environments if they have them.
+- (Class) Browser, Hierarchy Browser seem OK, but for syntax hilighting.
+
+##Next Steps
+==========
+- ChangeSets need some work.
 - Need to update syntax hilighting (Shout) 
 - Need to get compiled classes to register with Environment not Smalltalk.
 - Need a standard way to export Public Names from Environment to Smalltalk.
