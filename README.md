@@ -64,7 +64,10 @@ Easy mechanics.  Look at Environment>>fromCodePackage:
 
 Most work is teaching tools to look at Environments rather than just Smalltalk.  Note ```SystemDictionary>>environmentFromSystemCategory:```
 
-- Currently, need to update syntax hilighting (Shout) and get compiled classes to register with Environment not Smalltalk.
+- Need to update syntax hilighting (Shout) 
+- Need to get compiled classes to register with Environment not Smalltalk.
+- Need a standard way to export Public Names from Environment to Smalltalk.
+- Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk.
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
