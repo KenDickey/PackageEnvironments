@@ -1,3 +1,6 @@
+## A Package can be used as a Feature or and Environment
+============
+
 Early experiment with lightweight Environment / Namespace usage in Packages.
 
 I.e. Package based environments.
