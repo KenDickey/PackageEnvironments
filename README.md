@@ -73,10 +73,10 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 - Can use ```Environment class>>fromFeature: 'FeatureName'``` to convert a 'FeatureName' (category) to an Environment.
 - When created, Environments check #required: Features, and #use their Environments if they have them.
 - (Class) Browser, Hierarchy Browser seem OK, but for syntax hilighting.
+- ChangeSorter/ChangeSets seem OK.
 
 ##Next Steps
 ==========
-- ChangeSets need some work.
 - Need to update syntax hilighting (Shout) 
 - Need to get compiled classes to register with Environment not Smalltalk.
 - Need a standard way to export Public Names from Environment to Smalltalk.
