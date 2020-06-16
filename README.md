@@ -1,4 +1,4 @@
-## A Package can be used as a Feature or and Environment
+## A Package can be used as a Feature or an Environment
 ============
 
 Early experiment with lightweight Environment / Namespace usage in Packages.
@@ -69,7 +69,7 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 
 ##The Story So Far
 ==========
-- A Package can be used as a Feature or and Environment.
+- A Package can be used as a Feature or an Environment.
 - Can use ```Environment class>>fromFeature: 'FeatureName'``` to convert a 'FeatureName' (category) to an Environment.
 - When created, Environments check #required: Features, and #use their Environments if they have them.
 - (Class) Browser, Hierarchy Browser seem OK, but for syntax hilighting.
