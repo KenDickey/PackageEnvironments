@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 15 June 2020 at 2:46:10 pm'!
+'From Cuis 5.0 [latest update: #4219] on 16 June 2020 at 1:54:22 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 29!
+!provides: 'System-Environments' 1 31!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -41,6 +41,13 @@ name
 
 	^name! !
 
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 14:24:54'!
+package
+
+	^ (self packageName) 
+		ifNotNil: [ :pkgName | CodePackage installedPackages at: pkgName ifAbsent: []]
+		ifNil: [ CodePackage installedPackages detect: [:one| one environment == self] ifNone: [] ]! !
+
 !Environment methodsFor: 'printing' stamp: 'len 6/12/2020 08:22:40'!
 printOn: aStream
 	aStream nextPutAll: self name; nextPutAll: ' environment'! !
@@ -49,13 +56,6 @@ printOn: aStream
 @ classNameSymbol
 
 	^ self at: classNameSymbol ! !
-
-!Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 14:24:54'!
-package
-
-	^ (self packageName) 
-		ifNotNil: [ :pkgName | CodePackage installedPackages at: pkgName ifAbsent: []]
-		ifNil: [ CodePackage installedPackages detect: [:one| one environment == self] ifNone: [] ]! !
 
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 13:37:05'!
 packageName
@@ -395,10 +395,36 @@ environment
 
 	^ centralClass ifNil: [super environment] ifNotNil: [centralClass environment]! !
 
-!Class methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 16:38:38'!
+!ChangeSorter methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:54:02'!
+selectedClassOrMetaClass
+	"Careful, the class may have been removed!!"
+	"Nota Bene: overwrites base system method"
+
+	| cName cEnv |
+	currentClassName ifNil: [^ nil].
+	cEnv := myChangeSet codePackage environment.
+	(currentClassName endsWith: ' class')
+		ifTrue: [
+			cName _ (currentClassName copyFrom: 1 to: currentClassName size-6) asSymbol.
+			^ (cEnv at: cName ifAbsent: [^nil]) class]
+		ifFalse: [
+			cName _ currentClassName asSymbol.
+			^ cEnv at: cName ifAbsent: nil]! !
+
+!Class methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:21:25'!
 environment
-	"Answer either Smalltalk or _the_ Environment instance in my sharedPool"
+	"Answer either Smalltalk or the _first _ Environment instance in my sharedPool"
 	^self sharedPools detect: [ :p | p is: #Environment ] ifNone: [ Smalltalk ]! !
+
+!Metaclass methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:22:06'!
+environment
+
+	^ thisClass environment! !
+
+!Metaclass methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:26:18'!
+package
+
+	^ thisClass package! !
 
 !Categorizer methodsFor: '*system-environments' stamp: 'len 6/12/2020 08:50:54'!
 classesAt: aCategoryName
@@ -479,14 +505,14 @@ isolate
 		ifFalse: [^ environment].
 	^ Environment new fromCodePackage: self! !
 
-!ChangeSet class methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 01:25:35'!
+!ChangeSet class methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:26:47'!
 methodAdded: aCompiledMethod selector: aSymbol inProtocol: aCategoryName class: aClass requestor: requestor
 
 	| packageOrNil |
 	
 	aClass wantsChangeSetLogging ifFalse: [ ^self ].
 	
-	packageOrNil _ ((aClass isKindOf: Class) 
+	packageOrNil _ (((aClass isKindOf: Class)  or: [aClass isKindOf: Metaclass])
 							ifTrue: [aClass package] 
 							ifFalse: [CodePackage packageOfMethod: aCompiledMethod  methodReference 
 													ifNone: nil]
