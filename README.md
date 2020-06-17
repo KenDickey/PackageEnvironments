@@ -31,8 +31,6 @@ Currently, I am using (deprecated) sharedPool, which could be renamed to sharedE
 
 I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature require: 'MyFeature'.``` but the result is an environment.
 
-[Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a version fork" operation as distinct from typical usage as now.]
-
 
 [What tools?  How2 make visible w/o clutter?]
 
@@ -49,14 +47,14 @@ In your Cuis-Smalltalk directory:
 Currently, only able to convert a pre-loaded Feature into an Environment.
 
 ````smalltalk
+"Close ALL Browsers"
 Feature require: 'System-Environments'.
 Feature require: 'Morphic-Games-Solitaire'.
 Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
-(MorphicGamesSolitaire @ #FreeCell) newGameWithScale: 0.8.
+FreeCell newGameWithScale: 0.8. "FreeCell is exported from Environment"
 "Or World Menu -> New Morph.. -> Layouts -> FreeCell"
-HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #FreeCell) selector: nil.
-Smalltalk at: #Klondike put: (MorphicGamesSolitaire @ #Klondike).
-Klondike newGame.
+"Class #CardMorph is not visible in Smalltalk SystemDictionary"
+HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph) selector: nil.
 ````
 
 One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.  ChangeSets work with added methods.
@@ -74,13 +72,16 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 - When created, Environments check #required: Features, and #use their Environments if they have them.
 - (Class) Browser, Hierarchy Browser seem OK, but for syntax hilighting.
 - ChangeSorter/ChangeSets seem OK.
+- A Class method #environmentsExportMe should return true to register Class with Smalltalk.
+
 
 ##Next Steps
 ==========
 - Need to update syntax hilighting (Shout) 
-- Need to get compiled classes to register with Environment not Smalltalk.
 - Need a standard way to export Public Names from Environment to Smalltalk.
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk.
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
+
+[Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a version fork" operation as distinct from typical usage as now.]
 

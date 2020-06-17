@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4219] on 16 June 2020 at 1:54:22 pm'!
+'From Cuis 5.0 [latest update: #4226] on 16 June 2020 at 4:01:49 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 31!
+!provides: 'System-Environments' 1 32!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -67,7 +67,7 @@ doesNotUnderstand: aMessage
 	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
 	! !
 
-!Environment methodsFor: 'initialization' stamp: 'KenD 6/15/2020 14:47:11'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/16/2020 16:01:34'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
@@ -90,9 +90,12 @@ fromCodePackage: aCodePackage
 			ifTrue: [ otherEnironments addLast: possibleEnvironment ]
 	].
 	(otherEnironments size > 0) ifTrue: [
-		self classesDo: [ :cls |
-			otherEnironments do: [ :env | cls addSharedPool: env]
+		self classesDo: [ :aClass |
+			otherEnironments do: [ :env | aClass addSharedPool: env]
 		]
+	].
+	self classesDo: [ :aClass |
+			(aClass environmentsExportMe) ifTrue: [ Smalltalk at: aClass name put: aClass ]
 	].
 	Smalltalk at: name put: self
 ! !
@@ -415,6 +418,11 @@ selectedClassOrMetaClass
 environment
 	"Answer either Smalltalk or the _first _ Environment instance in my sharedPool"
 	^self sharedPools detect: [ :p | p is: #Environment ] ifNone: [ Smalltalk ]! !
+
+!Class methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 15:57:40'!
+environmentsExportMe
+	"If in an Environment do NOT register my name in  the Smalltalk SystemDictionary"
+	^false! !
 
 !Metaclass methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:22:06'!
 environment
