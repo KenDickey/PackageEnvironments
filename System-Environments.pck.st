@@ -1,4 +1,4 @@
-'From Cuis 5.0 [latest update: #4226] on 16 June 2020 at 4:01:49 pm'!
+'From Cuis 5.0 [latest update: #4226] on 17 June 2020 at 2:48:36 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
@@ -398,14 +398,14 @@ environment
 
 	^ centralClass ifNil: [super environment] ifNotNil: [centralClass environment]! !
 
-!ChangeSorter methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:54:02'!
+!ChangeSorter methodsFor: '*system-environments' stamp: 'KenD 6/17/2020 14:49:20'!
 selectedClassOrMetaClass
 	"Careful, the class may have been removed!!"
 	"Nota Bene: overwrites base system method"
 
 	| cName cEnv |
 	currentClassName ifNil: [^ nil].
-	cEnv := myChangeSet codePackage environment.
+	cEnv := myChangeSet codePackage  ifNotNil: [ :pkg | pkg environment ] ifNil: [Smalltalk].
 	(currentClassName endsWith: ' class')
 		ifTrue: [
 			cName _ (currentClassName copyFrom: 1 to: currentClassName size-6) asSymbol.
