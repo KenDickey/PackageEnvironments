@@ -72,14 +72,14 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 - When created, Environments check #required: Features, and #use their Environments if they have them.
 - (Class) Browser, Hierarchy Browser seem OK, but for syntax hilighting.
 - ChangeSorter/ChangeSets seem OK.
-- A Class method #environmentsExportMe should return true to register Class with Smalltalk.
+- The standard way to export a public Class from Environment to Smalltalk is for that Class to define a Class Method #environmentsExportMe which returns true.
 
 
 ##Next Steps
 ==========
 - Need to update syntax hilighting (Shout) 
-- Need a standard way to export Public Names from Environment to Smalltalk.
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk.
+- Much testing
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
