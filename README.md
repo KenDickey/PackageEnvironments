@@ -5,14 +5,48 @@ Early experiment with lightweight Environment / Namespace usage in Packages.
 
 I.e. Package based environments.
 
-Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
-
-
 Early thoughts:
 
 Goal: Multiple Classes with same name coexist in different package environments.
 
 Weak Goal: Cuis users won't notice until they need it.
+
+I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature require: 'MyFeature'.``` but the result is an environment.
+
+## TRY IT OUT
+=============
+Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
+
+In your Cuis-Smalltalk directory:
+```git clone https://github.com/KenDickey/PackageEnvironments```
+
+Currently, only able to convert a pre-loaded Feature into an Environment.
+
+````smalltalk
+"Close ALL Browsers"
+Feature require: 'System-Environments'.
+Feature require: 'Morphic-Games-Solitaire'.
+"CardMorph is a Class in Morphic-Games-Solitaire"
+CardMorph name.
+"Convert a CodePackage into an Environment"
+Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
+"Classes Klondike and FreeCell is exported from Environment"
+FreeCell newGameWithScale: 0.8. 
+"Or World Menu -> New Morph.. -> Layouts -> FreeCell"
+"Class #CardMorph is not visible in Smalltalk SystemDictionary
+ but can be accessed through its Enviromment, #MorphicGamesSolitaire"
+'Morphic-Games-Solitaire' asEnvironmentName.
+HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph)
+		       selector: #aboutToBeGrabbedBy: .
+````
+
+One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.  ChangeSets work with added methods.
+
+```Environment fromFeature: 'MyFeature'``` adds #required Environments.
+
+
+## Notes
+========
 
 - Current name lookup is local -> Smalltalk
 - New name lookup is local -> PackageEnv -> Smalltalk
@@ -29,8 +63,6 @@ Packages which #require: other packages = packages #use: other packages.
 
 Currently, I am using (deprecated) sharedPool, which could be renamed to sharedEnvironment.
 
-I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature require: 'MyFeature'.``` but the result is an environment.
-
 
 [What tools?  How2 make visible w/o clutter?]
 
@@ -38,28 +70,6 @@ What is the simplest thing that will work?
 
 - ```Environment fromFeature: 'FeatureName'.```
 - Extend a current environment to include a cluster/cohort of Features.
-
-TRY IT OUT
-
-In your Cuis-Smalltalk directory:
-```git clone https://github.com/KenDickey/PackageEnvironments```
-
-Currently, only able to convert a pre-loaded Feature into an Environment.
-
-````smalltalk
-"Close ALL Browsers"
-Feature require: 'System-Environments'.
-Feature require: 'Morphic-Games-Solitaire'.
-Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
-FreeCell newGameWithScale: 0.8. "FreeCell is exported from Environment"
-"Or World Menu -> New Morph.. -> Layouts -> FreeCell"
-"Class #CardMorph is not visible in Smalltalk SystemDictionary"
-HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph) selector: nil.
-````
-
-One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.  ChangeSets work with added methods.
-
-```Environment fromFeature: 'MyFeature'``` adds #required Environments.
 
 Easy mechanics.  Look at Environment>>fromCodePackage:
 
