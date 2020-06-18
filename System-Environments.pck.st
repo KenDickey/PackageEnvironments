@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4226] on 11 June 2020 at 11:20:53 am'!
+'From Cuis 5.0 [latest update: #4228] on 18 June 2020 at 1:44:47 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 33!
+!provides: 'System-Environments' 1 34!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -424,6 +424,12 @@ environment
 environmentsExportMe
 	"If in an Environment do NOT register my name in  the Smalltalk SystemDictionary"
 	^false! !
+
+!Class methodsFor: '*system-environments' stamp: 'KenD 6/18/2020 13:35:38'!
+isObsolete
+	"Return true if the receiver is obsolete."
+	"Nota Bene: I replace a basic system method"
+	^(self environment at: name ifAbsent: nil) ~~ self! !
 
 !Metaclass methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:22:06'!
 environment
