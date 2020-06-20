@@ -16,6 +16,7 @@ I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature re
 ## TRY IT OUT
 =============
 Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
+STATUS: Broken due to problems with MethodReference objects.  These assume global class names and do NOT deal with multiple Environment classes with the same name.
 
 In your Cuis-Smalltalk directory:
 ```git clone https://github.com/KenDickey/PackageEnvironments```
