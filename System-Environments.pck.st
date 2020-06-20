@@ -1,9 +1,9 @@
-'From Cuis 5.0 [latest update: #4226] on 11 June 2020 at 1:21:25 pm'!
+'From Cuis 5.0 [latest update: #4230] on 20 June 2020 at 5:14:41 am'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.
 '!
-!provides: 'System-Environments' 1 35!
+!provides: 'System-Environments' 1 37!
 !requires: 'Cuis-Base' 50 4208 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -62,9 +62,15 @@ packageName
 
 	^packageName! !
 
-!Environment methodsFor: 'error handling' stamp: 'len 6/11/2020 08:10:53'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 6/20/2020 05:07:53'!
 doesNotUnderstand: aMessage
-	^ self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]
+	"Answer a Class if Class name used as a selector"
+	^ self at: aMessage selector "Name for a Class in me?"
+		  ifAbsent: [ 
+			"Delegate to Smalltalk. 
+			System Dictionary protocol much larger than IdentityDictionary protocol"
+			Smalltalk perform: aMessage selector withArguments: aMessage arguments 
+		 ]
 	! !
 
 !Environment methodsFor: 'initialization' stamp: 'KenD 6/11/2020 11:20:52'!
