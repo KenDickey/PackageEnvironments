@@ -6,3 +6,8 @@ Germán Leiva demonstrates Namespaces in Pharo
 Code in
   http://www.squeaksource.com/Environments/
 
+
+Nested Classes:
+  https://m-sp.org/downloads/masters_thesis_nested_class_modularity.pdf
+  https://github.com/hpi-swa/smalltalk-nested-classes
+
