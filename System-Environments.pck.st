@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4243] on 21 June 2020 at 2:23:36 am'!
+'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 5:40:50 am'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 2!
+!provides: 'System-Environments' 1 3!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -466,6 +466,26 @@ selectedClassOrMetaClass
 		ifFalse: [
 			cName _ currentClassName asSymbol.
 			^ cEnv at: cName ifAbsent: nil]! !
+
+!UndefinedObject methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 05:29:21'!
+environment
+
+	^Smalltalk! !
+
+!ClassDescription methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 05:40:49'!
+sharedPoolsString
+	"Answer a string of my shared pool names separated by spaces."
+
+	^String streamContents: [ :stream |
+		self sharedPools 
+			do: [ :each |
+				(each is: #Environment)
+				ifFalse: [
+				stream nextPutAll: (Smalltalk
+					keyAtIdentityValue: each 
+					ifAbsent: [ 'private' ]) ]
+			]
+			separatedBy: [ stream space ] ]! !
 
 !Class methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:21:25'!
 environment
