@@ -26,6 +26,7 @@ Currently, only able to convert a pre-loaded Feature into an Environment.
 ````smalltalk
 "Close ALL Browsers"
 "FileList: fileIn '../PackageEnvironments/4242-CuisCore-PreEnvironment-2020Jun28-09h03m-KenD.001.cs.st'"
+" then fileIn: 4243-CuisCore-EnvPart2-2020Jun21-01h19m-KenD.001.cs.st"
 Feature require: 'System-Environments'.
 Feature require: 'Morphic-Games-Solitaire'.
 
