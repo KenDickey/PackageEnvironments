@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4242] on 28 June 2020 at 3:44:10 pm'!
+'From Cuis 5.0 [latest update: #4243] on 21 June 2020 at 2:23:36 am'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 1!
+!provides: 'System-Environments' 1 2!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -55,6 +55,21 @@ printOn: aStream
 @ classNameSymbol
 
 	^ self at: classNameSymbol ! !
+
+!Environment methodsFor: 'accessing' stamp: 'KenD 6/21/2020 02:23:07'!
+classNamed: className 
+	"className is either a class name or a class name followed by ' class'.
+	Answer the class or metaclass it names.
+	Answer nil if no class by that name."
+	
+	self at: className asSymbol ifPresent: [ :found |
+		^ found isBehavior ifTrue: [ found ]].
+
+	(className withoutSuffix: ' class') ifNotNil: [ :baseName |
+		self at: baseName asSymbol ifPresent: [ :found |
+			^ found isBehavior ifTrue: [ found class ]]].
+
+	^ nil! !
 
 !Environment methodsFor: 'accessing' stamp: 'KenD 6/12/2020 13:37:05'!
 packageName
@@ -403,6 +418,14 @@ classList
 environment
 
 	^ centralClass ifNil: [super environment] ifNotNil: [centralClass environment]! !
+
+!CodeFileBrowser methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 02:14:24'!
+baseCodeSource
+	^ baseCodeSource ifNil: [ self environment ]! !
+
+!CodeFileBrowser methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 02:14:19'!
+caseCodeSource
+	^ caseCodeSource ifNil: [ self environment ]! !
 
 !ChangeList methodsFor: '*system-environments' stamp: 'KenD 6/20/2020 15:32:58'!
 scanCategory: category class: class meta: meta stamp: stamp prior: aPriorMethod overrides: anOverridenMethod
