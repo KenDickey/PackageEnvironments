@@ -16,7 +16,7 @@ I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature re
 ## TRY IT OUT
 =============
 
-STATUS: Code Sketch [pre-alpha; feaure incomplete; expect breakage. FILE OUT CHANGES ST YOUR OWN RISK 8^]
+STATUS: Code Sketch [pre-alpha; feaure incomplete; expect breakage. FILE OUT CHANGES AT YOUR OWN RISK 8^]
 
 In your Cuis-Smalltalk directory:
 ```git clone https://github.com/KenDickey/PackageEnvironments```
@@ -94,6 +94,7 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 
 ##Next Steps
 ==========
+- Deal with Packages which create multiple Caregories.
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk. [Now RED. Make GREEN?]
 - Take a Feature which has not been #require:'d and compile into an Environment.
 - Much testing
