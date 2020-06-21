@@ -13,12 +13,14 @@ I need to be able to find the Method I represent, even if the Class holding that
 !
 
 
-!String methodsFor: 'converting' stamp: 'KenD 6/28/2020 09:07:21'!
+!String methodsFor: 'converting' stamp: 'KenD 6/21/2020 02:00:37'!
 asEnvironmentName
 	"I am a system catargory name or a package name.
 	Answer an adequate name for an environment, e.g. hyphens removed and first character uppercase."
 
-	^ self asIdentifier: true! !
+	| name |
+	name := (self withoutSuffix: '.pck.st') ifNil: [self] ifNotNil: [:trimmed | trimmed].
+	^name asIdentifier: true! !
 
 
 !SystemDictionary methodsFor: 'accessing' stamp: 'KenD 6/28/2020 09:13:37'!
