@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 4:37:18 pm'!
+'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 4:49:31 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 8!
+!provides: 'System-Environments' 1 9!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -76,7 +76,7 @@ packageName
 
 	^packageName! !
 
-!Environment methodsFor: 'initialization' stamp: 'KenD 6/11/2020 11:20:52'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 6/21/2020 16:42:18'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
@@ -104,7 +104,9 @@ fromCodePackage: aCodePackage
 		]
 	].
 	self classesDo: [ :aClass |
-			(aClass environmentsExportMe) ifTrue: [ Smalltalk at: aClass name put: aClass ]
+			((aClass environmentsExportMe)
+				and: [(aClass name = name) not])  "Don't let Class shadow Me (see doesNotUNderstand:)"
+				ifTrue: [ Smalltalk at: aClass name put: aClass ]
 	].
 	Smalltalk at: name put: self.
 	CodeWindow allSubInstancesDo: [ :b | b updateListsAndCode ] "Keep UI up to date"
@@ -197,10 +199,14 @@ classesDo: aBlock
 	"My Dictionary values are all my Classes"
 	self valuesDo: aBlock! !
 
-!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/9/2020 12:56:06'!
+!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/21/2020 16:49:17'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
+	| envName |
+	envName _ aCodePackage packageName asEnvironmentName.
+	(Smalltalk includesKey: envName asSymbol)
+		ifTrue: [self inform: envName, ' already esists as an environent.  Fix it'. ^nil].
 	(PopUpMenu confirm: 'Really convert ', 
 							aCodePackage packageName, 
 							' to an Environment?')
