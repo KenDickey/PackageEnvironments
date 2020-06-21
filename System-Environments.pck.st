@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 3 July 2020 at 3:56:50 pm'!
+'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 4:37:18 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 7!
+!provides: 'System-Environments' 1 8!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -126,7 +126,7 @@ name: aSymbol packageName: aString
 	name _  aSymbol.
 	packageName _ aString! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 7/3/2020 15:43:32'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 6/21/2020 16:36:43'!
 doesNotUnderstand: aMessage
 	"Answer a Class if Class name used as a selector"
 	^ self at: aMessage selector "Name for a Class in me?"
@@ -141,7 +141,7 @@ doesNotUnderstand: aMessage
 							aMessage arguments printString.
 						^Smalltalk perform: aMessage selector withArguments: aMessage arguments
 					]).
-			(aClass canUnderstand: aMessage selector)
+			(aClass class canUnderstand: aMessage selector) "Must be a Class method with this selector"
 				ifTrue: [aClass perform: aMessage selector withArguments: aMessage arguments]
 				ifFalse: [
 					Transcript addEntry: 'Environment delegates to  Smalltalk ', 
