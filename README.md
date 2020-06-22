@@ -58,15 +58,17 @@ FreeCell newGame.
  but can be accessed through its Enviromment, #MorphicGamesSolitaire"
 'Morphic-Games-Solitaire.pck.st' asEnvironmentName.
 MorphicGamesSolitaire @ #CardMorph. "Same as:  MorphicGamesSolitaire CardMorph"
-HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph)
+HierarchyBrowserWindow onClass: (MorphicGamesSolitaire CardMorph)
 		       selector: #aboutToBeGrabbedBy: .
 
 "Environments may be nested"
 Feature require: 'Construction'.
 Environment fromFeature: 'Game'. "required by Construction"
 Environment fromFeature: 'Construction'.
-"Construction Environment is NOT Class Construction"
-(Construction @ #Construction) start. "Start the Construction Game"
+"Construction Environment is NOT Class Construction but have same name"
+(Construction Construction) start. "Start the Construction Game"
+"Inspect a Class, eg, Construction Construction, and note both Construction and Game environments
+  in sharedPools => bindingOf: finds required Classes"
 
 ````
 
