@@ -51,12 +51,13 @@ CardMorph name.
 Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
 
 "Classes Klondike and FreeCell are exported from Environment"
-FreeCell newGameWithScale: 0.8. 
+FreeCell newGame. 
 "Or World Menu -> New Morph.. -> Layouts -> FreeCell"
 
 "Class #CardMorph is no longer visible in Smalltalk SystemDictionary
  but can be accessed through its Enviromment, #MorphicGamesSolitaire"
 'Morphic-Games-Solitaire.pck.st' asEnvironmentName.
+MorphicGamesSolitaire @ #CardMorph. "Same as:  MorphicGamesSolitaire CardMorph"
 HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph)
 		       selector: #aboutToBeGrabbedBy: .
 
