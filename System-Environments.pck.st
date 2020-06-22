@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 4 July 2020 at 3:19:53 pm'!
+'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 6:17:57 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 11!
+!provides: 'System-Environments' 1 12!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -201,13 +201,13 @@ classesDo: aBlock
 	"My Dictionary values are all my Classes"
 	self valuesDo: aBlock! !
 
-!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/21/2020 16:49:17'!
+!Environment class methodsFor: 'instance creation' stamp: 'KenD 6/21/2020 18:18:42'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
 	| envName |
 	envName _ aCodePackage packageName asEnvironmentName.
-	(Smalltalk includesKey: envName asSymbol)
+	((Smalltalk includesKey: envName asSymbol) and: [(Smalltalk at: envName asSymbol) is: #Environment])
 		ifTrue: [self inform: envName, ' already esists as an environent.  Fix it'. ^nil].
 	(PopUpMenu confirm: 'Really convert ', 
 							aCodePackage packageName, 
