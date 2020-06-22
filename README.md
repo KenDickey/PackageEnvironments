@@ -23,6 +23,7 @@ Gist:
 - ```'Morphic-Games-Solitaire.pck.st' asEnvironmentName.``` -> 'MorphicGamesSolitaire'
 - ```Environment fromFeature: 'Morphic-Games-Solitaire'.```
 - ```Klondike``` class implements method ```environmentsExportMe``` which answers ```true```.
+- Classes internal to an Environment are known by ```MorphicGamesSolitaire @ #CardMorph``` or just ```MorphicGamesSolitaire CardMorph```
 - A Package is just a Package.  Saving a Package works the same for an Environment as a Feature.
 
 ## TRY IT OUT
