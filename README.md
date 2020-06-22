@@ -7,16 +7,28 @@ I.e. Package based environments.
 
 Early thoughts:
 
-Goal: Multiple Classes with same name coexist in different package environments.
-
-Weak Goal: Cuis users won't notice until they need it.
-
 I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature require: 'MyFeature'.``` but the result is an environment.
+
+Goals: 
+- Multiple Classes with same name coexist in different package environments
+- Unburden Smalltalk SystemDictionary by reducing the number of helper/support class names
+
+Weak Goals: 
+- Cuis users won't notice until they need it
+- Introduce fewest new concepts and mechanisms
+- Work as expected with current tools
+
+Gist:
+- Environments are IdentityDictionaries of Classes with their Feature and Smalltalk name.
+- ```'Morphic-Games-Solitaire.pck.st' asEnvironmentName.``` -> 'MorphicGamesSolitaire'
+- ```Environment fromFeature: 'Morphic-Games-Solitaire'.```
+- ```Klondike``` class implements method ```environmentsExportMe``` which answers ```true```.
+- A Package is just a Package.  Saving a Package works the same for an Environment as a Feature.
 
 ## TRY IT OUT
 =============
 
-STATUS: Code Sketch [pre-alpha; feaure incomplete; expect breakage. FILE OUT CHANGES AT YOUR OWN RISK 8^]
+STATUS: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
 
 In your Cuis-Smalltalk directory:
 ```git clone https://github.com/KenDickey/PackageEnvironments```
