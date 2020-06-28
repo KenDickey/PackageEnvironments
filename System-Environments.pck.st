@@ -1,10 +1,9 @@
-'From Cuis 5.0 [latest update: #4230] on 20 June 2020 at 5:14:41 am'!
+'From Cuis 5.0 [latest update: #4242] on 28 June 2020 at 3:44:10 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
-This allows importing multiple Feature/Package Classes with the same name.
-'!
-!provides: 'System-Environments' 1 37!
-!requires: 'Cuis-Base' 50 4208 nil!
+This allows importing multiple Feature/Package Classes with the same name.'!
+!provides: 'System-Environments' 1 1!
+!requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
 
@@ -62,17 +61,6 @@ packageName
 
 	^packageName! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 6/20/2020 05:07:53'!
-doesNotUnderstand: aMessage
-	"Answer a Class if Class name used as a selector"
-	^ self at: aMessage selector "Name for a Class in me?"
-		  ifAbsent: [ 
-			"Delegate to Smalltalk. 
-			System Dictionary protocol much larger than IdentityDictionary protocol"
-			Smalltalk perform: aMessage selector withArguments: aMessage arguments 
-		 ]
-	! !
-
 !Environment methodsFor: 'initialization' stamp: 'KenD 6/11/2020 11:20:52'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
@@ -123,9 +111,16 @@ name: aSymbol packageName: aString
 	name _  aSymbol.
 	packageName _ aString! !
 
-!Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
-is: aSymbol
-	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
+!Environment methodsFor: 'error handling' stamp: 'KenD 6/20/2020 05:07:53'!
+doesNotUnderstand: aMessage
+	"Answer a Class if Class name used as a selector"
+	^ self at: aMessage selector "Name for a Class in me?"
+		  ifAbsent: [ 
+			"Delegate to Smalltalk. 
+			System Dictionary protocol much larger than IdentityDictionary protocol"
+			Smalltalk perform: aMessage selector withArguments: aMessage arguments 
+		 ]
+	! !
 
 !Environment methodsFor: 'private' stamp: 'KenD 6/15/2020 09:11:45'!
 requirementNames
@@ -157,6 +152,10 @@ requirementNamesFromCodePackage: aCodePackage
 			]
 	].
 	^namesToReturn! !
+
+!Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
+is: aSymbol
+	^ aSymbol == #Environment or: [ super is: aSymbol ]! !
 
 !Environment methodsFor: 'enumerating' stamp: 'KenD 6/15/2020 14:46:31'!
 classesDo: aBlock
@@ -405,6 +404,30 @@ environment
 
 	^ centralClass ifNil: [super environment] ifNotNil: [centralClass environment]! !
 
+!ChangeList methodsFor: '*system-environments' stamp: 'KenD 6/20/2020 15:32:58'!
+scanCategory: category class: class meta: meta stamp: stamp prior: aPriorMethod overrides: anOverridenMethod
+	"Nota Bene: replaces base system method"
+	| itemPosition method environment |
+	environment := Smalltalk environmentFromSystemCategory: category.
+	[
+		itemPosition _ file position.
+		method _ file nextChunk.
+		method notEmpty ] whileTrue: [ "done when double terminators"
+			self
+				addItem: (ChangeRecord new 
+					file: file 
+					position: itemPosition 
+					type: #method
+					class: class 
+					category: category 
+					meta: meta 
+					stamp: stamp
+					prior: aPriorMethod
+					overrides: anOverridenMethod)
+				text: 'method: ' , class , (meta ifTrue: [' class '] ifFalse: [' '])
+					, (((environment at: class ifAbsent: [Object class]) parserClass selectorFrom: method) ifNil: [''])
+					, (stamp isEmpty ifTrue: [''] ifFalse: ['; ' , stamp])]! !
+
 !ChangeSorter methodsFor: '*system-environments' stamp: 'KenD 6/17/2020 14:49:20'!
 selectedClassOrMetaClass
 	"Careful, the class may have been removed!!"
@@ -431,11 +454,48 @@ environmentsExportMe
 	"If in an Environment do NOT register my name in  the Smalltalk SystemDictionary"
 	^false! !
 
+!Class methodsFor: '*system-environments' stamp: 'KenD 6/20/2020 15:50:42'!
+fileOutPool: aPool onFileStream: aFileStream 
+	"Nota Bene: I replace a basic system method"
+	| aPoolName |
+	(aPool  isKindOf: SharedPool class) ifTrue:[^self notify: 'we do not fileout SharedPool type shared pools for now'].
+	(aPool  is: #Environment) ifTrue:[^self notify: 'we do not fileout SharedPool Environments'].
+	aPoolName _ self environment keyAtIdentityValue: aPool.
+	Transcript newLine; show: aPoolName.
+	aFileStream nextPutAll: 'Transcript show: ''' , aPoolName , '''; newLine!!'; newLine.
+	aFileStream nextPutAll: 'Smalltalk at: #' , aPoolName , ' put: Dictionary new!!'; newLine.
+	aPool keys sort do: [ :aKey | | aValue |
+		aValue _ aPool at: aKey.
+		aFileStream nextPutAll: aPoolName , ' at: #''' , aKey asString , '''', ' put:  '.
+		aValue isNumber
+			ifTrue: [ aValue printOn: aFileStream ]
+			ifFalse: [
+				aFileStream nextPutAll: '('.
+				aValue printOn: aFileStream.
+				aFileStream nextPutAll: ')' ].
+		aFileStream nextPutAll: '!!'; newLine ].
+	aFileStream newLine! !
+
 !Class methodsFor: '*system-environments' stamp: 'KenD 6/18/2020 13:35:38'!
 isObsolete
 	"Return true if the receiver is obsolete."
 	"Nota Bene: I replace a basic system method"
 	^(self environment at: name ifAbsent: nil) ~~ self! !
+
+!Class methodsFor: '*system-environments' stamp: 'KenD 6/20/2020 15:52:35'!
+rename: aString
+	"The new name of the receiver is the argument, aString."
+	"Nota Bene: I replace base system method"
+	| newName |
+	(newName _ aString asSymbol) ~= self name
+		ifFalse: [^ self].
+	(self environment includesKey: newName)
+		ifTrue: [^ self error: newName , ' already exists'].
+	(Undeclared includesKey: newName)
+		ifTrue: [self inform: 'There are references to, ' , aString printString , '
+from Undeclared. Check them after this change.'].
+
+	self safeRenameTo: newName.! !
 
 !Class methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 13:21:25'!
 shouldFileOutPool: aPoolName
@@ -477,41 +537,6 @@ listAtCategoryNamed: categoryName
 			^ self listAtCategoryNumber: i 
 		]! !
 
-!String methodsFor: '*system-environments' stamp: 'len 6/12/2020 07:17:16'!
-asEnvironmentName
-	"I am a system catargory name or a package name.
-	Answer an adequate name for an environment, e.g. hyphens removed and first character uppercase."
-
-	^ self asIdentifier: true! !
-
-!SystemDictionary methodsFor: '*system-environments' stamp: 'len 6/12/2020 08:25:55'!
-environmentFromSystemCategory: aString
-	| subcategory name i |
-	subcategory _ aString.
-	[name _ subcategory asEnvironmentName asSymbol.
-	self at: name ifPresent: [:anObject| (anObject is: #Environment) ifTrue: [^ anObject]].
-	(i _ subcategory findLast: [:one| one = $-]) = 0] whileFalse:
-	[subcategory _ subcategory copyFrom: 1 to: i-1].
-	^ self! !
-
-!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/15/2020 13:13:07'!
-environmentOrNilFromCategory: aString
-	
-	self at: (aString asEnvironmentName asSymbol) 
-		ifPresent: [ :possibleEnvironment | 
-			(possibleEnvironment is: #Environment) ifTrue: [ ^possibleEnvironment ] 
-	].
-	^nil! !
-
-!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/9/2020 15:40:51'!
-icon
-
-	^ Color transparent icon! !
-
-!SystemDictionary methodsFor: '*system-environments' stamp: 'len 6/11/2020 08:29:14'!
-name
-	^ #Smalltalk! !
-
 !CodePackage methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 02:11:48'!
 classesDo: aBlock
 	"Nota Bene: this overwrites base system method"
@@ -526,14 +551,48 @@ environment
 	"Answer the Environment for the classes in this package, or Smalltalk if the package is not isolated."
 	^ Smalltalk environmentFromSystemCategory: self systemCategoryPrefix! !
 
-!CodePackage methodsFor: '*system-environments' stamp: 'KenD 6/12/2020 14:42:46'!
-isolate
-	"If the package classes are in the global Smalltalk environment, create a new environment corresponding to this package name and move all classes to the new environment, and answer the new enviroment. If the environment was already created, answer the existing environment."
-	| environment |
-	(environment _ self environment) == Smalltalk ifFalse: [^ environment].
-	(PopUpMenu confirm: 'Really move classes in ', self packageName, ' to a new Environment?')
-		ifFalse: [^ environment].
-	^ Environment new fromCodePackage: self! !
+!MethodReference methodsFor: '*system-environments' stamp: 'KenD 6/28/2020 15:39:18'!
+actualClassIfAbsent: anAbsentBlock 
+	"Nota Bene: replaced basr system metrhod"
+	^(self environment) 
+		at: classSymbol 
+		ifPresent: [ :actualClass |
+			classIsMeta
+				ifTrue: [ actualClass class ]
+				ifFalse: [ actualClass ] ]
+		ifAbsent: anAbsentBlock 
+! !
+
+!MethodReference methodsFor: '*system-environments' stamp: 'KenD 6/28/2020 15:40:09'!
+environment
+
+	^categoryName 
+		ifNil: [ Smalltalk ]
+		ifNotNil:  [ Smalltalk environmentFromSystemCategory: categoryName ]! !
+
+!MethodReference methodsFor: '*system-environments' stamp: 'KenD 6/28/2020 15:43:44'!
+setClass: aClass methodSymbol: methodSym stringVersion: aString
+	"Nota Bene: replaces base system method"
+	categoryName := (aClass environment is: #Environment)
+		ifTrue:  [aClass environment packageName]
+		ifFalse: [nil].
+	self
+		setClassSymbol: aClass theNonMetaClass name
+		classIsMeta: aClass isMeta
+		methodSymbol: methodSym
+		stringVersion: aString! !
+
+!ChangeSet methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 13:30:33'!
+changedClasses
+	"Answer an OrderedCollection of changed or edited classes.
+	Does not include removed classes.  Sort alphabetically by name."
+	"Nota Bene: replaces base system method."
+	"Much faster to sort names first, then convert back to classes.  Because metaclasses reconstruct their name at every comparison in the sorted collection.
+	8/91 sw chgd to filter out non-existent classes (triggered by problems with class-renames"
+ 
+	^ self changedClassNames
+		collect: [:className | codePackage environment classNamed: className]
+		thenSelect: [:aClass | aClass notNil]! !
 
 !ChangeSet class methodsFor: '*system-environments' stamp: 'KenD 6/16/2020 13:26:47'!
 methodAdded: aCompiledMethod selector: aSymbol inProtocol: aCategoryName class: aClass requestor: requestor
