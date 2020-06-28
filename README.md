@@ -16,7 +16,7 @@ I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature re
 ## TRY IT OUT
 =============
 Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
-STATUS: Broken due to problems with MethodReference objects.  These assume global class names and do NOT deal with multiple Environment classes with the same name.
+STATUS: Broken due to problems with MethodReference objects.  These assume global class names and do NOT deal with multiple Environment classes with the same name. DO NOT FILE OUT CHANGES !!
 
 In your Cuis-Smalltalk directory:
 ```git clone https://github.com/KenDickey/PackageEnvironments```
@@ -25,6 +25,7 @@ Currently, only able to convert a pre-loaded Feature into an Environment.
 
 ````smalltalk
 "Close ALL Browsers"
+"FileList: fileIn '../PackageEnvironments/4242-CuisCore-PreEnvironment-2020Jun28-09h03m-KenD.001.cs.st'"
 Feature require: 'System-Environments'.
 Feature require: 'Morphic-Games-Solitaire'.
 
