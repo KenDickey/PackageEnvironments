@@ -15,8 +15,7 @@ I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature re
 
 ## TRY IT OUT
 =============
-Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage]
-STATUS: Broken due to problems with MethodReference objects.  These assume global class names and do NOT deal with multiple Environment classes with the same name. DO NOT FILE OUT CHANGES !!
+Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage. FILE OUT CHANGES ST YOUR OWN RISK !!
 
 In your Cuis-Smalltalk directory:
 ```git clone https://github.com/KenDickey/PackageEnvironments```
@@ -24,16 +23,17 @@ In your Cuis-Smalltalk directory:
 Currently, only able to convert a pre-loaded Feature into an Environment.
 
 ````smalltalk
-"Close ALL Browsers"
-"FileList: fileIn '../PackageEnvironments/4242-CuisCore-PreEnvironment-2020Jun28-09h03m-KenD.001.cs.st'"
-" then fileIn: 4243-CuisCore-EnvPart2-2020Jun21-01h19m-KenD.001.cs.st"
+ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4242-CuisCore-PreEnvironment-2020Jun28-09h03m-KenD.001.cs.st').
+ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4243-CuisCore-EnvPart2-2020Jun21-01h19m-KenD.001.cs.st').
+ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4244-CuisCore-KenDickey-2020Jun21-02h13m-KenD.002.cs.st').
+
 Feature require: 'System-Environments'.
 Feature require: 'Morphic-Games-Solitaire'.
 
 "CardMorph is a Class in Morphic-Games-Solitaire"
 CardMorph name.
 
-"Convert a CodePackage into an Environment"
+"Convert 'Morphic-Games-Solitaire' from a FEATURE into an Environment"
 Environment fromFeature: 'Morphic-Games-Solitaire'.  "Answer YES to popup"
 
 "Classes Klondike and FreeCell are exported from Environment"
@@ -42,7 +42,7 @@ FreeCell newGameWithScale: 0.8.
 
 "Class #CardMorph is no longer visible in Smalltalk SystemDictionary
  but can be accessed through its Enviromment, #MorphicGamesSolitaire"
-'Morphic-Games-Solitaire' asEnvironmentName.
+'Morphic-Games-Solitaire.pck.st' asEnvironmentName.
 HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph)
 		       selector: #aboutToBeGrabbedBy: .
 ````
@@ -94,11 +94,11 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 
 ##Next Steps
 ==========
-- Need to update syntax hilighting (Shout) 
+- Package Save exports Class Def with poolDictionaries; should not see them.
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk.
 - Much testing
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
-[Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a version fork" operation as distinct from typical usage as now.]
+[Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a "version fork" operation as distinct from typical usage as now.]
 
