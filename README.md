@@ -15,7 +15,8 @@ I would like ```Environment fromFeature: 'MyFeature.``` to be like ```Feature re
 
 ## TRY IT OUT
 =============
-Status: Code Sketch [pre-alpha; feaure incomplete; expect breakage. FILE OUT CHANGES ST YOUR OWN RISK !!
+
+STATUS: Code Sketch [pre-alpha; feaure incomplete; expect breakage. FILE OUT CHANGES ST YOUR OWN RISK 8^]
 
 In your Cuis-Smalltalk directory:
 ```git clone https://github.com/KenDickey/PackageEnvironments```
@@ -55,18 +56,15 @@ One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger
 ## Notes
 ========
 
-- Current name lookup is local -> Smalltalk
-- New name lookup is local -> PackageEnv -> Smalltalk
-
 Selectors are polymorphic (method names don't care).
 
 Instanced know their Class.  Classes know their CodePackage.
 
 Packages which #require: other packages = packages #use: other packages.
 
-=> Packages have an "Environment" dictionary of Class-name -> Class.
+=> Packages can have an "Environment" dictionary of Class-name -> Class.
 
-- Packages which #require: another package import that Package's Environment
+- Packages which #require: another package import that Package's Environment (if any)
 
 Currently, I am using (deprecated) sharedPool, which could be renamed to sharedEnvironment.
 
@@ -78,7 +76,7 @@ What is the simplest thing that will work?
 - ```Environment fromFeature: 'FeatureName'.```
 - Extend a current environment to include a cluster/cohort of Features.
 
-Easy mechanics.  Look at Environment>>fromCodePackage:
+Easy mechanics.  Look at ```Environment>>fromCodePackage:```
 
 Most work is teaching tools to look at Environments rather than just Smalltalk.  Note ```SystemDictionary>>environmentFromSystemCategory:```
 
@@ -89,13 +87,14 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 - When created, Environments check #required: Features, and #use their Environments if they have them.
 - (Class) Browser, Hierarchy Browser seem OK, but for syntax hilighting.
 - ChangeSorter/ChangeSets seem OK.
-- The standard way to export a public Class from Environment to Smalltalk is for that Class to define a Class Method #environmentsExportMe which returns true.
-
+- The standard way to export a public Class from Environment to Smalltalk is for that Class to define a Class Method ```environmentsExportMe``` which returns true.
+- Class & Hierarchy Browsers, Package Browser, ChangeSorter, Debugger seem to work OK.
+- Package Save/FileOut working (same for Feature or Environment).
+- ChangeSets seem OK.
 
 ##Next Steps
 ==========
-- Package Save exports Class Def with poolDictionaries; should not see them.
-- Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk.
+- Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk. [Now RED. Make GREEN?]
 - Much testing
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
