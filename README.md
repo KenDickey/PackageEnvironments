@@ -102,3 +102,6 @@ I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
 [Note that Packages can be versioned: I.e. A Class in version N can differ from a Class in version N+1; instances are of distinct classes.  Same mechanics as PackageA vs PackageB with duplicate Class names.  This is probably a "version fork" operation as distinct from typical usage as now.]
 
+##Issues
+- Assumes Feature Name = Package Name = Category Name
+
