@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 5:40:50 am'!
+'From Cuis 5.0 [latest update: #4241] on 30 June 2020 at 1:54:41 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 3!
+!provides: 'System-Environments' 1 4!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -167,6 +167,11 @@ requirementNamesFromCodePackage: aCodePackage
 			]
 	].
 	^namesToReturn! !
+
+!Environment methodsFor: 'testing' stamp: 'KenD 6/30/2020 13:56:11'!
+environmentsExportMe
+
+	^false! !
 
 !Environment methodsFor: 'testing' stamp: 'KenD 6/9/2020 14:34:11'!
 is: aSymbol
@@ -472,6 +477,11 @@ environment
 
 	^Smalltalk! !
 
+!UndefinedObject methodsFor: '*system-environments' stamp: 'KenD 6/30/2020 13:42:54'!
+environmentsExportMe
+
+	^false! !
+
 !ClassDescription methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 05:40:49'!
 sharedPoolsString
 	"Answer a string of my shared pool names separated by spaces."
@@ -579,6 +589,11 @@ listAtCategoryNamed: categoryName
 			i _ categoryArray indexOf: categoryName ifAbsent: [^Array new].
 			^ self listAtCategoryNumber: i 
 		]! !
+
+!SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/30/2020 13:55:14'!
+environmentsExportMe
+
+	^false! !
 
 !CodePackage methodsFor: '*system-environments' stamp: 'KenD 6/11/2020 02:11:48'!
 classesDo: aBlock
