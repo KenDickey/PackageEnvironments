@@ -66,7 +66,7 @@ Packages which #require: other packages = packages #use: other packages.
 
 - Packages which #require: another package import that Package's Environment (if any)
 
-Currently, I am using (deprecated) sharedPool, which could be renamed to sharedEnvironment.
+Currently, I am using (deprecated) sharedPool, which could be renamed to sharedEnvironments.
 
 
 [What tools?  How2 make visible w/o clutter?]
@@ -95,6 +95,7 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 ##Next Steps
 ==========
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk. [Now RED. Make GREEN?]
+- Take a Feature which has not been #require:'d and compile into an Environment.
 - Much testing
 
 I have not even looked at refactorings yet, nor multiple package 'cohorts'.
