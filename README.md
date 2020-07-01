@@ -24,7 +24,7 @@ In your Cuis-Smalltalk directory:
 Currently, only able to convert a pre-loaded Feature into an Environment.
 
 ````smalltalk
-ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4242-CuisCore-PreEnvironment-2020Jun28-09h03m-KenD.001.cs.st').
+ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4242-CuisCore-PreEnvironment-2020Jul01-14h23m-KenD.001.cs.st').
 ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4243-CuisCore-EnvPart2-2020Jun21-01h19m-KenD.001.cs.st').
 ChangeSet fileIn: (DirectoryEntry smalltalkImageDirectory parent // 'PackageEnvironments/4244-CuisCore-KenDickey-2020Jun21-02h13m-KenD.002.cs.st').
 
