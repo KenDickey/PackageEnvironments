@@ -94,7 +94,7 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 
 ##Next Steps
 ==========
-- Deal with Packages which create multiple Caregories.
+- Deal with Packages which create multiple Categories.
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk. [Now RED. Make GREEN?]
 - Take a Feature which has not been #require:'d and compile into an Environment.
 - Much testing
