@@ -46,6 +46,14 @@ FreeCell newGameWithScale: 0.8.
 'Morphic-Games-Solitaire.pck.st' asEnvironmentName.
 HierarchyBrowserWindow onClass: (MorphicGamesSolitaire @ #CardMorph)
 		       selector: #aboutToBeGrabbedBy: .
+
+"Environments may be nested"
+Feature require: 'Construction'.
+Environment fromFeature: 'Game'. "required by Construction"
+Environment fromFeature: 'Construction'.
+"Construction Environment is NOT Class Construction"
+(Construction @ #Construction) start. "Start the Construction Game"
+
 ````
 
 One can open a Class or Hierarchy Browser, add a 'self halt' breakpoint, trigger it.  Debugger seems OK.  ChangeSets work with added methods.
