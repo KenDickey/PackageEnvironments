@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4242] on 1 July 2020 at 3:44:32 pm'!
+'From Cuis 5.0 [latest update: #4241] on 3 July 2020 at 3:12:56 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 5!
+!provides: 'System-Environments' 1 6!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -386,6 +386,18 @@ hierarchicalClassList
 		on: OrderedCollection new
 		indent: ''! !
 
+!Browser methodsFor: '*system-environments' stamp: 'KenD 7/3/2020 14:57:03'!
+potentialClassNames
+	"Answer the names of all the classes that could be viewed in this browser.  This hook is provided so that HierarchyBrowsers can indicate their restricted subset.  For generic Browsers, the entire list of classes known to Smalltalk is provided, though of course that really only is accurate in the case of full system browsers."
+	"NB: replaces base system method"
+	| allCassNames |
+	allCassNames :=  Smalltalk classNames asSet.
+	Environment allInstancesDo: [ :env | 
+		allCassNames  addAll: (env collect: [ :aClass | (env name asString , ' @ ', aClass name asString) asSymbol ])
+	].
+	^allCassNames asOrderedCollection
+	! !
+
 !Browser methodsFor: '*system-environments' stamp: 'KenD 6/10/2020 21:47:39'!
 selectedClass
 	"Answer the class that is currently selected. Answer nil if no selection exists."
@@ -613,6 +625,42 @@ classesDo: aBlock
 environment
 	"Answer the Environment for the classes in this package, or Smalltalk if the package is not isolated."
 	^ Smalltalk environmentFromSystemCategory: self systemCategoryPrefix! !
+
+!BrowserWindow class methodsFor: '*system-environments' stamp: 'KenD 7/3/2020 15:10:50'!
+findClassFrom: potentialClassNames ifFound: aBlock
+	"NB: replaces base system method"
+	| classNames exactMatch foundClass index toMatch |
+	self  classNameRequester request: self findClassDialogTitle initialAnswer: '' do: [:pattern|
+		pattern isEmpty
+			ifTrue: [self flash]
+			ifFalse: 
+				[toMatch _ (pattern copyWithout: $.) asLowercase withBlanksTrimmed.
+				classNames _ (pattern last = $. or: [pattern last = $ ])
+					ifTrue: [potentialClassNames select: [:nm |  nm asLowercase = toMatch]]
+					ifFalse: [potentialClassNames select: [:n | n includesSubstring: toMatch caseSensitive: false]].
+				classNames isEmpty
+					ifTrue: [self flash]
+					ifFalse:
+						[exactMatch _ classNames detect: [ :each | each asLowercase = toMatch] ifNone: nil.
+
+						index _ classNames size = 1
+							ifTrue: [ 1 ]
+							ifFalse: [ exactMatch
+								ifNil: [(PopUpMenu labelArray: classNames lines: #()) startUpMenu]
+								ifNotNil: [classNames addFirst: exactMatch.
+									(PopUpMenu labelArray: classNames lines: #(1)) startUpMenu]].
+
+						index = 0
+							ifTrue: [self flash]
+							ifFalse: [ | nameSym |
+								nameSym _ classNames at: index.
+								(nameSym asString includes: $@)
+								  ifFalse: [foundClass _ Smalltalk at: nameSym asSymbol]
+								  ifTrue: [|tokens env |
+									tokens _ nameSym asString findTokens: ' '.
+									 env _  Smalltalk at:  tokens first asSymbol ifAbsent: [self flash. ^nil].
+									 foundClass _ env at: tokens last asSymbol ifAbsent: [self flash. ^nil].
+									aBlock value: foundClass]]]]].! !
 
 !MethodReference methodsFor: '*system-environments' stamp: 'KenD 6/28/2020 15:39:18'!
 actualClassIfAbsent: anAbsentBlock 
