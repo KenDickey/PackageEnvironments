@@ -7,3 +7,10 @@ environment
 		ifNil: [ Smalltalk ]
 		ifNotNil:  [ Smalltalk environmentFromSystemCategory: categoryName ]! !
 
+
+!CodeWindow methodsFor: 'updating' stamp: 'KenD 7/3/2020 10:21:46'!
+updateListsAndCode
+	"All code windows receive this message on any code change in the system"
+	self canDiscardEdits ifTrue: [
+		self allMorphsDo: [ :m | (m is: #PluggableListMorph) ifTrue: [ m verifyContents ]].
+		model ifNotNil: [ model updateIfNeeded ]]! !
