@@ -99,10 +99,13 @@ Most work is teaching tools to look at Environments rather than just Smalltalk. 
 - Class & Hierarchy Browsers, Package Browser, ChangeSorter, Debugger seem to work OK.
 - Package Save/FileOut working (same for Feature or Environment).
 - ChangeSets seem OK.
+- Packages which create multiple Categories seem OK.
+- Find Class works in (System) Browser.
+
 
 ##Next Steps
 ==========
-- Deal with Packages which create multiple Categories.
+- Need to be able to add new Classes to an Environment (Create in Browser).
 - Need to get UI to denote Classes named in Environments but unknown in/to Smalltalk. [Now RED. Make GREEN?]
 - Take a Feature which has not been #require:'d and compile into an Environment.
 - Much testing
