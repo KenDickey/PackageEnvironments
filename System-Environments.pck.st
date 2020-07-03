@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 3 July 2020 at 3:12:56 pm'!
+'From Cuis 5.0 [latest update: #4241] on 3 July 2020 at 3:56:50 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 6!
+!provides: 'System-Environments' 1 7!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -126,7 +126,7 @@ name: aSymbol packageName: aString
 	name _  aSymbol.
 	packageName _ aString! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 7/1/2020 15:22:19'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 7/3/2020 15:43:32'!
 doesNotUnderstand: aMessage
 	"Answer a Class if Class name used as a selector"
 	^ self at: aMessage selector "Name for a Class in me?"
@@ -135,10 +135,20 @@ doesNotUnderstand: aMessage
 			"If not, delegate to Smalltalk. 
 			As System Dictionary protocol much larger than IdentityDictionary protocol"
 			aClass _ (self at: name 
-					ifAbsent: [Smalltalk perform: aMessage selector withArguments: aMessage arguments]).
+					ifAbsent: [
+						Transcript addEntry: 'Environment delegates to  Smalltalk ', 
+							aMessage selector asString, ' ',
+							aMessage arguments printString.
+						^Smalltalk perform: aMessage selector withArguments: aMessage arguments
+					]).
 			(aClass canUnderstand: aMessage selector)
 				ifTrue: [aClass perform: aMessage selector withArguments: aMessage arguments]
-				ifFalse: [Smalltalk perform: aMessage selector withArguments: aMessage arguments]
+				ifFalse: [
+					Transcript addEntry: 'Environment delegates to  Smalltalk ', 
+							aMessage selector asString, ' ',
+							aMessage arguments printString.
+					Smalltalk perform: aMessage selector withArguments: aMessage arguments
+				]
 		 ]
 	! !
 
@@ -626,7 +636,7 @@ environment
 	"Answer the Environment for the classes in this package, or Smalltalk if the package is not isolated."
 	^ Smalltalk environmentFromSystemCategory: self systemCategoryPrefix! !
 
-!BrowserWindow class methodsFor: '*system-environments' stamp: 'KenD 7/3/2020 15:10:50'!
+!BrowserWindow class methodsFor: '*system-environments' stamp: 'KenD 7/3/2020 15:56:00'!
 findClassFrom: potentialClassNames ifFound: aBlock
 	"NB: replaces base system method"
 	| classNames exactMatch foundClass index toMatch |
@@ -655,12 +665,14 @@ findClassFrom: potentialClassNames ifFound: aBlock
 							ifFalse: [ | nameSym |
 								nameSym _ classNames at: index.
 								(nameSym asString includes: $@)
-								  ifFalse: [foundClass _ Smalltalk at: nameSym asSymbol]
-								  ifTrue: [|tokens env |
-									tokens _ nameSym asString findTokens: ' '.
-									 env _  Smalltalk at:  tokens first asSymbol ifAbsent: [self flash. ^nil].
-									 foundClass _ env at: tokens last asSymbol ifAbsent: [self flash. ^nil].
-									aBlock value: foundClass]]]]].! !
+								  	ifFalse: [foundClass _ Smalltalk at: nameSym asSymbol]
+								  	ifTrue: [|tokens env |
+										tokens _ nameSym asString findTokens: ' '.
+									 	env _  Smalltalk at:  tokens first asSymbol ifAbsent: [self flash. ^nil].
+									 	foundClass _ env at: tokens last asSymbol ifAbsent: [self flash. ^nil].
+									].
+								aBlock value: foundClass
+							]]]].! !
 
 !MethodReference methodsFor: '*system-environments' stamp: 'KenD 6/28/2020 15:39:18'!
 actualClassIfAbsent: anAbsentBlock 
