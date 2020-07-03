@@ -5,6 +5,10 @@ environment
 
 	^Smalltalk! !
 
+!UndefinedObject methodsFor: '*system-environments' stamp: 'KenD 6/30/2020 13:42:54'!
+environmentsExportMe
+
+	^false! !
 
 !MethodReference methodsFor: '*system-environments' stamp: 'KenD 6/28/2020 15:40:09'!
 environment
@@ -12,7 +16,6 @@ environment
 	^categoryName 
 		ifNil: [ Smalltalk ]
 		ifNotNil:  [ Smalltalk environmentFromSystemCategory: categoryName ]! !
-
 
 !CodeFileBrowser methodsFor: '*system-environments' stamp: 'KenD 6/21/2020 02:14:24'!
 baseCodeSource
@@ -22,6 +25,21 @@ baseCodeSource
 caseCodeSource
 	^ caseCodeSource ifNil: [ self environment ]! !
 
+!ChangeSorter methodsFor: '*system-environments' stamp: 'KenD 6/17/2020 14:45:40'!
+selectedClassOrMetaClass
+	"Careful, the class may have been removed!!"
+	"Nota Bene: overwrites base system method"
+
+	| cName cEnv |
+	currentClassName ifNil: [^ nil].
+	cEnv := myChangeSet codePackage ifNil: [ Smalltalk ] ifNotNil: [ :pkg | pkg environment ].
+	(currentClassName endsWith: ' class')
+		ifTrue: [
+			cName _ (currentClassName copyFrom: 1 to: currentClassName size-6) asSymbol.
+			^ (cEnv at: cName ifAbsent: [^nil]) class]
+		ifFalse: [
+			cName _ currentClassName asSymbol.
+			^ cEnv at: cName ifAbsent: nil]! !
 
 !ChangeList methodsFor: '*system-environments' stamp: 'KenD 7/1/2020 15:41:15'!
 scanCategory: category class: class meta: meta stamp: stamp prior: aPriorMethod overrides: anOverridenMethod
