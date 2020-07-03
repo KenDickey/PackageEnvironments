@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 30 June 2020 at 1:54:41 pm'!
+'From Cuis 5.0 [latest update: #4242] on 1 July 2020 at 3:44:32 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 4!
+!provides: 'System-Environments' 1 5!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -126,14 +126,19 @@ name: aSymbol packageName: aString
 	name _  aSymbol.
 	packageName _ aString! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 6/20/2020 05:07:53'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 7/1/2020 15:22:19'!
 doesNotUnderstand: aMessage
 	"Answer a Class if Class name used as a selector"
 	^ self at: aMessage selector "Name for a Class in me?"
-		  ifAbsent: [ 
-			"Delegate to Smalltalk. 
-			System Dictionary protocol much larger than IdentityDictionary protocol"
-			Smalltalk perform: aMessage selector withArguments: aMessage arguments 
+		  ifAbsent: [ | aClass |
+			"An Environment may contain a Class of the same name"
+			"If not, delegate to Smalltalk. 
+			As System Dictionary protocol much larger than IdentityDictionary protocol"
+			aClass _ (self at: name 
+					ifAbsent: [Smalltalk perform: aMessage selector withArguments: aMessage arguments]).
+			(aClass canUnderstand: aMessage selector)
+				ifTrue: [aClass perform: aMessage selector withArguments: aMessage arguments]
+				ifFalse: [Smalltalk perform: aMessage selector withArguments: aMessage arguments]
 		 ]
 	! !
 
@@ -432,7 +437,7 @@ baseCodeSource
 caseCodeSource
 	^ caseCodeSource ifNil: [ self environment ]! !
 
-!ChangeList methodsFor: '*system-environments' stamp: 'KenD 6/20/2020 15:32:58'!
+!ChangeList methodsFor: '*system-environments' stamp: 'KenD 7/1/2020 15:41:15'!
 scanCategory: category class: class meta: meta stamp: stamp prior: aPriorMethod overrides: anOverridenMethod
 	"Nota Bene: replaces base system method"
 	| itemPosition method environment |
@@ -453,7 +458,7 @@ scanCategory: category class: class meta: meta stamp: stamp prior: aPriorMethod 
 					prior: aPriorMethod
 					overrides: anOverridenMethod)
 				text: 'method: ' , class , (meta ifTrue: [' class '] ifFalse: [' '])
-					, (((environment at: class ifAbsent: [Object class]) parserClass selectorFrom: method) ifNil: [''])
+					, (((environment at: class ifAbsent: [Object ]) class parserClass selectorFrom: method) ifNil: [''])
 					, (stamp isEmpty ifTrue: [''] ifFalse: ['; ' , stamp])]! !
 
 !ChangeSorter methodsFor: '*system-environments' stamp: 'KenD 6/17/2020 14:49:20'!
