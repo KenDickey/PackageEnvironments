@@ -22,6 +22,10 @@ Gist:
 - Environments are IdentityDictionaries of Classes with their Feature and Smalltalk name.
 - ```'Morphic-Games-Solitaire.pck.st' asEnvironmentName.``` -> 'MorphicGamesSolitaire'
 - ```Environment fromFeature: 'Morphic-Games-Solitaire'.```
+- Class bindings are moved from Smalltalk into an Environment
+- Class>>```bindingOf:``` looks in that classes sharedPool,
+ so adding the Environment to each class removed from Smalltalk
+ uses standard lookup semantics and caching.
 - ```Klondike``` class implements method ```environmentsExportMe``` which answers ```true```.
 - Classes internal to an Environment are known by ```MorphicGamesSolitaire @ #CardMorph``` or just ```MorphicGamesSolitaire CardMorph```
 - A Package is just a Package.  Saving a Package works the same for an Environment as a Feature.
@@ -69,7 +73,7 @@ Environment fromFeature: 'Construction'.
 (Construction Construction) start. "Start the Construction Game"
 Construction start. "Cute doesNotUnderstand hack to avoid name clash"
 "Inspect a Class, eg, Construction Construction, and
-  note both Construction and Game environments in sharedPools
+  note both Construction and Game enOAvironments in sharedPools
   => bindingOf: finds required Classes"
 
 ````
