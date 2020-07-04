@@ -69,11 +69,13 @@ HierarchyBrowserWindow onClass: (MorphicGamesSolitaire CardMorph)
 Feature require: 'Construction'.
 Environment fromFeature: 'Game'. "required by Construction"
 Environment fromFeature: 'Construction'.
+
 "#Construction Environment is NOT Class #Construction but same name"
 (Construction Construction) start. "Start the Construction Game"
 Construction start. "Cute doesNotUnderstand hack to avoid name clash"
+
 "Inspect a Class, eg, Construction Construction, and
-  note both Construction and Game enOAvironments in sharedPools
+  note both Construction and Game environments in sharedPools
   => bindingOf: finds required Classes"
 
 ````
