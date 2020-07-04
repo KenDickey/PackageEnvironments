@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 4:49:31 pm'!
+'From Cuis 5.0 [latest update: #4241] on 4 July 2020 at 3:05:44 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 9!
+!provides: 'System-Environments' 1 10!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -128,7 +128,7 @@ name: aSymbol packageName: aString
 	name _  aSymbol.
 	packageName _ aString! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 6/21/2020 16:36:43'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 7/4/2020 15:03:22'!
 doesNotUnderstand: aMessage
 	"Answer a Class if Class name used as a selector"
 	^ self at: aMessage selector "Name for a Class in me?"
@@ -137,22 +137,24 @@ doesNotUnderstand: aMessage
 			"If not, delegate to Smalltalk. 
 			As System Dictionary protocol much larger than IdentityDictionary protocol"
 			aClass _ (self at: name 
-					ifAbsent: [
-						Transcript addEntry: 'Environment delegates to  Smalltalk ', 
-							aMessage selector asString, ' ',
-							aMessage arguments printString.
-						^Smalltalk perform: aMessage selector withArguments: aMessage arguments
-					]).
+					ifAbsent: [ self reallyDoesNotUnderstand: aMessage  ]).
 			(aClass class canUnderstand: aMessage selector) "Must be a Class method with this selector"
 				ifTrue: [aClass perform: aMessage selector withArguments: aMessage arguments]
-				ifFalse: [
-					Transcript addEntry: 'Environment delegates to  Smalltalk ', 
-							aMessage selector asString, ' ',
-							aMessage arguments printString.
-					Smalltalk perform: aMessage selector withArguments: aMessage arguments
-				]
+				ifFalse: [ self reallyDoesNotUnderstand: aMessage  ]
 		 ]
 	! !
+
+!Environment methodsFor: 'error handling' stamp: 'KenD 7/4/2020 15:04:20'!
+reallyDoesNotUnderstand: aMessage
+	"See if we can delegate to Smalltalk"
+	(Smalltalk  class canUnderstand: aMessage selector) 
+	ifTrue:  [
+		Transcript addEntry: 'Environment delegates to  Smalltalk ', 
+						aMessage selector asString, ' ',
+						aMessage arguments printString.
+		^Smalltalk perform: aMessage selector withArguments: aMessage arguments
+	]
+	ifFalse:  [ super doesNotUnderstand: aMessage ]! !
 
 !Environment methodsFor: 'private' stamp: 'KenD 6/15/2020 09:11:45'!
 requirementNames
