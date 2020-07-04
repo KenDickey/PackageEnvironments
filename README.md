@@ -23,7 +23,7 @@ Gist:
 - ```'Morphic-Games-Solitaire.pck.st' asEnvironmentName.``` -> 'MorphicGamesSolitaire'
 - ```Environment fromFeature: 'Morphic-Games-Solitaire'.```
 - Class bindings are moved from Smalltalk into an Environment
-- Class>>```bindingOf:``` looks in that classes sharedPool,
+- Class>>```bindingOf:``` looks in that class's sharedPool,
  so adding the Environment to each class removed from Smalltalk
  uses standard lookup semantics and caching.
 - ```Klondike``` class implements method ```environmentsExportMe``` which answers ```true```.
