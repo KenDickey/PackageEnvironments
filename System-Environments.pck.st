@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 21 June 2020 at 6:17:57 pm'!
+'From Cuis 5.0 [latest update: #4241] on 5 July 2020 at 1:16:35 pm'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 12!
+!provides: 'System-Environments' 1 13!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -128,7 +128,7 @@ name: aSymbol packageName: aString
 	name _  aSymbol.
 	packageName _ aString! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 7/4/2020 15:20:40'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 7/5/2020 11:58:16'!
 doesNotUnderstand: aMessage
 	"Answer a Class if Class name used as a selector"
 	^ self at: aMessage selector "Name for a Class in me?"
@@ -139,17 +139,23 @@ doesNotUnderstand: aMessage
 			aClass _ (self at: name 
 					ifAbsent: [ ^self reallyDoesNotUnderstand: aMessage  ]).
 			(aClass class canUnderstand: aMessage selector) "Must be a Class method with this selector"
-				ifTrue: [aClass perform: aMessage selector withArguments: aMessage arguments]
+				ifTrue: [
+					Transcript addEntry: self printString, ' delegates to ', 
+						aClass printString, ' ',
+						aMessage selector asString, ' ',
+						aMessage arguments printString.	
+					aClass perform: aMessage selector withArguments: aMessage arguments
+				]
 				ifFalse: [ self reallyDoesNotUnderstand: aMessage  ]
 		 ]
 	! !
 
-!Environment methodsFor: 'error handling' stamp: 'KenD 7/4/2020 15:14:29'!
+!Environment methodsFor: 'error handling' stamp: 'KenD 7/5/2020 11:56:49'!
 reallyDoesNotUnderstand: aMessage
 	"See if we can delegate to Smalltalk"
 	(Smalltalk  class canUnderstand: aMessage selector) 
 	ifTrue:  [
-		Transcript addEntry: 'Environment delegates to  Smalltalk ', 
+		Transcript addEntry: self printString, ' delegates to  Smalltalk ', 
 						aMessage selector asString, ' ',
 						aMessage arguments printString.
 		Smalltalk perform: aMessage selector withArguments: aMessage arguments
@@ -612,17 +618,17 @@ classesAt: aCategoryName
 	environment _ Smalltalk environmentFromSystemCategory: aCategoryName.
 	^(self listAtCategoryNamed: aCategoryName) collect: [:aClassName | environment at: aClassName asSymbol ]! !
 
-!Categorizer methodsFor: '*system-environments' stamp: 'KenD 6/12/2020 13:42:26'!
+!Categorizer methodsFor: '*system-environments' stamp: 'KenD 7/5/2020 13:16:22'!
 listAtCategoryNamed: categoryName
 	"Answer the array of elements associated with the name, categoryName."
 	"Nota Bene: I replace a base system method"
-	| environment  |
+	| environment |
 	environment  _ Smalltalk at: ((categoryName asIdentifier: true) asSymbol) ifAbsent: [nil].
-	(environment notNil and: [environment is: #Environment] )
+	((environment notNil and: [environment is: #Environment] ) and: [self isKindOf: SystemOrganizer])
 		ifTrue: [ ^ environment keys ]
-		ifFalse: [| i | 
-			i _ categoryArray indexOf: categoryName ifAbsent: [^Array new].
-			^ self listAtCategoryNumber: i 
+		ifFalse: [| index | 
+			index _ categoryArray indexOf: categoryName ifAbsent: [^Array new].
+			^ self listAtCategoryNumber: index
 		]! !
 
 !SystemDictionary methodsFor: '*system-environments' stamp: 'KenD 6/30/2020 13:55:14'!
