@@ -140,4 +140,4 @@ I have not even looked at refactorings yet, nor multiple package 'cohorts'.
 
 ##Issues
 - Setup for compilation is way too complex and not intuitive. [Browser>>defineClass:notifying: -> Compiler class>>evaluate:notifying:logged: -> many onion skin layers before parsing a token].
-
+- Category names have no direct relationship with Package names.
