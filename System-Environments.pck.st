@@ -1,8 +1,8 @@
-'From Cuis 5.0 [latest update: #4241] on 5 July 2020 at 1:16:35 pm'!
+'From Cuis 5.0 [latest update: #4241] on 7 July 2020 at 11:04:07 am'!
 'Description Environments are associated with packaged Features, whose class namespace is disjoint from Smalltalk.
 
 This allows importing multiple Feature/Package Classes with the same name.'!
-!provides: 'System-Environments' 1 13!
+!provides: 'System-Environments' 1 14!
 !requires: 'Cuis-Base' 50 4241 nil!
 SystemOrganization addCategory: #'System-Environments'!
 
@@ -76,7 +76,7 @@ packageName
 
 	^packageName! !
 
-!Environment methodsFor: 'initialization' stamp: 'KenD 6/21/2020 16:42:18'!
+!Environment methodsFor: 'initialization' stamp: 'KenD 7/7/2020 11:04:03'!
 fromCodePackage: aCodePackage
 	"Convert from an already filed in Feature/Package.
 	 Answer a new Environment."
@@ -109,6 +109,7 @@ fromCodePackage: aCodePackage
 				ifTrue: [ Smalltalk at: aClass name put: aClass ]
 	].
 	Smalltalk at: name put: self.
+	Smalltalk flushClassNameCache.
 	CodeWindow allSubInstancesDo: [ :b | b updateListsAndCode ] "Keep UI up to date"
 ! !
 
